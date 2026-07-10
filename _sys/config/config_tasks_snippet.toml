@@ -1,0 +1,38 @@
+# ═══ PRIDAT DO config.toml ═══════════════════════════════════════════
+# (email_org_admin patri do stavajici sekce [org])
+
+[org]
+# ... stavajici klice (nazev, ico, gln) ...
+email_org_admin = "radim@mostarna.bio"      # kam chodi chybove notifikace uloh
+
+# ── DB spojeni pro tasks (stejna instance jako [vyroba.mssql]) ────────
+[mssql]
+driver  = "ODBC Driver 17 for SQL Server"
+server  = 'NJABKO\SQLEXPRESS'
+trusted = true
+db_all  = "StwPh_26896869_all"              # cross-year 'all' vrstva (v_451 ...)
+db_most = "most"                            # vlastni DB (core.config/task/task_log)
+
+# ── Odchozi mail (interni relay zodiac, bez auth) ────────────────────
+[smtp]
+host = "zodiac.hostetin.org"
+port = 25
+auth = false                                # relay bez prihlaseni; heslo netreba
+from = "e-most@mostarna.bio"                # systemovy odesilatel
+
+# ── Ulohy (tasks) ────────────────────────────────────────────────────
+[tasks.zasoby_min]
+enabled         = true
+view            = "dbo.v_451_skz_obj_min_stav"
+mail_to         = ["radim@mostarna.bio"]
+subject         = "e-most: zasoby pod minimem"
+posilat_prazdne = false                     # true = posilat i kdyz nic pod minimem
+
+[tasks.banka_import]
+enabled = false
+
+[tasks.skeny_kontrola]
+enabled = false
+
+[tasks.faktury_neuhr]
+enabled = false
