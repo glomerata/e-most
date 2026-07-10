@@ -19,6 +19,8 @@ import datetime as _dt
 import os
 import smtplib
 import struct
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 import pyodbc
@@ -103,7 +105,9 @@ def rows_to_dicts(cur) -> list[dict]:
 
 
 # --- mail (interni relay zodiac, port 25, bez auth) -----------------------
-def posli_mail(predmet: str, telo: str, prijemci, html: bool = False) -> None:
+def posli_mail(predmet: str, telo: str, prijemci, html: bool = False,
+               prilohy: list = None) -> None:
+    """Odesle mail. prilohy = seznam (nazev_souboru, bajty[, mime_subtype])."""
     s = cfg()["smtp"]
     if isinstance(prijemci, str):
         prijemci = [prijemci]
@@ -111,7 +115,20 @@ def posli_mail(predmet: str, telo: str, prijemci, html: bool = False) -> None:
     if not prijemci:
         raise RuntimeError("posli_mail: prazdny seznam prijemcu")
 
-    msg = MIMEText(telo, "html" if html else "plain", "utf-8")
+    telo_part = MIMEText(telo, "html" if html else "plain", "utf-8")
+
+    if prilohy:
+        msg = MIMEMultipart()
+        msg.attach(telo_part)
+        for p in prilohy:
+            nazev, data = p[0], p[1]
+            subtype = p[2] if len(p) > 2 else "pdf"
+            att = MIMEApplication(data, _subtype=subtype)
+            att.add_header("Content-Disposition", "attachment", filename=nazev)
+            msg.attach(att)
+    else:
+        msg = telo_part
+
     msg["Subject"] = predmet
     msg["From"] = s["from"]
     msg["To"] = ", ".join(prijemci)

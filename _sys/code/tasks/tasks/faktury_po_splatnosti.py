@@ -49,7 +49,7 @@ def run(tcfg: dict) -> str:
     base.posli_mail(predmet, telo, prijemci, html=True)
 
     base.log_text("faktury_po_splatnosti",
-                  f"suma={int(suma)} Kc, faktur={len(faktury)}, prijemci={prijemci}")
+                  f"suma={int(suma)} Kc, faktur={len(faktury)}, prijemci={prijemci}", log_id=tcfg.get("_log_id"))
     return f"{len(faktury)} faktur po splatnosti, suma {int(suma)} Kc, mail na {', '.join(prijemci)}"
 
 

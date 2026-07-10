@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="Windows-1250"?>
+<dat:dataPack id="test-upom-B" ico="26896869" application="e-most" note="Test upominky B" version="2.0"
+    xmlns:dat="http://www.stormware.cz/schema/version_2/data.xsd"
+    xmlns:prn="http://www.stormware.cz/schema/version_2/print.xsd"
+    xmlns:ftr="http://www.stormware.cz/schema/version_2/filter.xsd">
+  <dat:dataPackItem id="item1" version="2.0">
+    <prn:print version="1.0">
+      <prn:record agenda="vydane_faktury">
+        <ftr:filter>
+          <ftr:queryFilter>Fa.ICO = '07479433' AND Fa.KcLikv &gt; 0 AND Fa.DatSplat &lt; GETDATE() AND Fa.RelTpFak = 1</ftr:queryFilter>
+        </ftr:filter>
+      </prn:record>
+      <prn:printerSettings>
+        <prn:report>
+          <prn:id>194</prn:id>
+        </prn:report>
+        <prn:pdf>
+          <prn:fileName>test_upominka_B.pdf</prn:fileName>
+          <prn:binaryData>
+            <prn:responseXml>true</prn:responseXml>
+          </prn:binaryData>
+        </prn:pdf>
+      </prn:printerSettings>
+    </prn:print>
+  </dat:dataPackItem>
+</dat:dataPack>

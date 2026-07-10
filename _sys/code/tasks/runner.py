@@ -24,6 +24,8 @@ _TASKS = {
     "scheduler":      "tasks.scheduler",
     "zasoby_min":     "tasks.zasoby_min",
     "banka_import":   "tasks.banka_import",
+    "upominky":       "tasks.upominky",
+    "mserver_healthcheck": "tasks.mserver_healthcheck",
     "skeny_kontrola": "tasks.skeny_kontrola",
     "faktury_po_splatnosti": "tasks.faktury_po_splatnosti",
 }
@@ -46,6 +48,7 @@ def spust(task_klic: str, param: str | None = None) -> int:
 
     modul = importlib.import_module(_TASKS[task_klic])
     log_id = base.log_start(task_klic)
+    tcfg["_log_id"] = log_id
     try:
         zprava = modul.run(tcfg)
         base.log_konec(log_id, task_klic, "ok", zprava)

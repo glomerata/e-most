@@ -37,6 +37,11 @@ port = 25
 auth = false                                # relay bez přihlášení; heslo netřeba
 from = "e-most@mostarna.bio"                # systémový odesílatel
 
+# ── POHODA mServer (XML tisk sestav do PDF) ─────────────────────────
+[mserver]
+url = "http://njabko:7701/xml"          # dle /http restart "mServer1"
+# auth (STW-Authorization Base64) -> secrets.toml [mserver] auth = "..."
+
 # ── Scheduler (plánovač úloh) ────────────────────────────────────────
 [scheduler]
 # Task Scheduler spouští `runner.py scheduler` každých beh_minut.
@@ -59,6 +64,15 @@ enabled  = false
 banka_dir = "{doc_root}\\Účetnictví\\Banka\\{rok}\\FIO_CZK"
 ucet      = "2500697325"                    # jen pro název souboru fio_<ucet>_<rok>_<id>.pdf
 # fio_token → secrets.toml  [tasks.banka_import] fio_token = "..."
+
+[tasks.upominky]
+enabled           = true
+report_id         = 194                 # sestava Fupomin (Upominka faktur v prodleni)
+dny_po_splatnosti = 5
+mail_to           = ["pavla@mostarna.bio"]
+subject           = "Upomínka faktur v prodlení"
+pdf_root          = "{doc_root}\\Fakturace\\Vydané faktury"
+series_len        = 4
 
 [tasks.skeny_kontrola]
 enabled = false

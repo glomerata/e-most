@@ -48,5 +48,5 @@ def run(tcfg: dict) -> str:
     with open(cesta, "wb") as f:
         f.write(r.content)
 
-    base.log_text("banka_import", f"stazen vypis {st_rok}/{st_cislo} -> {cesta}")
+    base.log_text("banka_import", f"stazen vypis {st_rok}/{st_cislo} -> {cesta}", log_id=tcfg.get("_log_id"))
     return f"FIO vypis {st_rok}/{st_cislo} ulozen: {nazev}"
