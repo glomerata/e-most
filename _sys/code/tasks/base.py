@@ -1,14 +1,15 @@
 """
 base.py
 =======
-Spolecna infrastruktura pro ulohy (tasks): config, DB spojeni, mail, log.
+Spolecna infrastruktura pro ulohy (tasks): config, DB spojeni, mail,
+DB log (core.task_log) i textovy .log soubor.
 
 Zasady (stejne jako vyroba/db.py):
   - Zadne spojeni na urovni modulu.
-  - Vzdy parametrizovane dotazy (zadne formatovani stringu do SQL).
+  - Vzdy parametrizovane dotazy.
   - Logika v Pythonu, ne v DB.
-  - ts_* sloupce se plni ZONOVE (datetime.now().astimezone()) kvuli Grafane.
-  - config.toml = source of truth; secrets.toml (mimo git) doplni hesla.
+  - ts_* sloupce zonove (datetime.now().astimezone()) kvuli Grafane.
+  - config = source of truth (emost_config: config.toml + secrets.toml).
 """
 
 from __future__ import annotations
@@ -20,14 +21,10 @@ import smtplib
 import struct
 from email.mime.text import MIMEText
 
-try:
-    import tomllib                      # Python 3.11+
-except ModuleNotFoundError:             # Python 3.10
-    import tomli as tomllib
-
 import pyodbc
 
-# MSSQL datetimeoffset (ODBC typ -155) starsi pyodbc neumi cist sam.
+import emost_config
+
 _SQL_DATETIMEOFFSET = -155
 
 
@@ -38,41 +35,18 @@ def _handle_datetimeoffset(dto_value):
                         tup[6] // 1000, tz)
 
 
-_DEFAULT_CFG = os.path.normpath(
-    os.path.join(os.path.dirname(__file__), "..", "..", "config", "config.toml"))
-_CFG_PATH = os.environ.get("EMOST_CONFIG", _DEFAULT_CFG)
-_SECRETS_PATH = os.path.join(os.path.dirname(_CFG_PATH), "secrets.toml")
-
-
 def _now():
-    """Aktualni cas SE ZONOU (offset) - pro datetimeoffset sloupce."""
+    """Aktualni cas SE ZONOU (offset) - pro datetimeoffset i .log."""
     return _dt.datetime.now().astimezone()
-
-
-def _merge(base_d: dict, extra: dict) -> None:
-    """Rekurzivne vlije extra do base (secrets doplni/prebiji config)."""
-    for k, v in extra.items():
-        if isinstance(v, dict) and isinstance(base_d.get(k), dict):
-            _merge(base_d[k], v)
-        else:
-            base_d[k] = v
 
 
 _CFG_CACHE = None
 
 
 def cfg() -> dict:
-    """Cely config.toml slity se secrets.toml (hesla). Cachovano."""
     global _CFG_CACHE
     if _CFG_CACHE is None:
-        if not os.path.exists(_CFG_PATH):
-            raise RuntimeError(f"Nenalezen config: {_CFG_PATH}")
-        with open(_CFG_PATH, "rb") as f:
-            data = tomllib.load(f)
-        if os.path.exists(_SECRETS_PATH):
-            with open(_SECRETS_PATH, "rb") as f:
-                _merge(data, tomllib.load(f))
-        _CFG_CACHE = data
+        _CFG_CACHE = emost_config.load()
     return _CFG_CACHE
 
 
@@ -95,7 +69,7 @@ def _connect(database: str):
 
 @contextlib.contextmanager
 def db_all():
-    """Spojeni do cross-year 'all' vrstvy (v_451 ...). Jen cteni."""
+    """Cross-year 'all' vrstva (v_451 ...). Jen cteni."""
     conn = _connect(cfg()["mssql"]["db_all"])
     try:
         yield conn
@@ -105,8 +79,18 @@ def db_all():
 
 @contextlib.contextmanager
 def db_most():
-    """Spojeni do vlastni DB 'most' (core.config, core.task, core.task_log)."""
+    """Vlastni DB 'most' (core.config / task / task_log)."""
     conn = _connect(cfg()["mssql"].get("db_most", "most"))
+    try:
+        yield conn
+    finally:
+        conn.close()
+
+
+@contextlib.contextmanager
+def db_ucetni():
+    """Aktualni ucetni Pohoda DB (StwPh_..._<rok_ucto_db>). Jen cteni."""
+    conn = _connect(emost_config.db_ucetni(cfg()))
     try:
         yield conn
     finally:
@@ -134,7 +118,7 @@ def posli_mail(predmet: str, telo: str, prijemci, html: bool = False) -> None:
 
     srv = smtplib.SMTP(s["host"], int(s.get("port", 25)), timeout=15)
     try:
-        if s.get("auth", False):          # default false = zodiac relay bez prihlaseni
+        if s.get("auth", False):
             srv.starttls()
             srv.login(s["user"], s["password"])
         srv.sendmail(s["from"], prijemci, msg.as_string())
@@ -142,7 +126,27 @@ def posli_mail(predmet: str, telo: str, prijemci, html: bool = False) -> None:
         srv.quit()
 
 
-# --- log uloh (core.task_log + core.task v DB most) -----------------------
+# --- textovy log (.log soubor) --------------------------------------------
+def _log_path() -> str:
+    base = cfg()["storage"]["base"]
+    d = os.path.join(base, "_sys", "logs")
+    os.makedirs(d, exist_ok=True)
+    return os.path.join(d, "tasks.log")
+
+
+def log_text(task_klic: str, text: str, log_id=None, uroven: str = "info") -> None:
+    """Zapise radek do tasks.log:  ts | task | log_id=.. | uroven | text"""
+    radek = (f"{_now().isoformat(timespec='seconds')} | {task_klic} | "
+             f"log_id={log_id if log_id is not None else '-'} | "
+             f"{uroven} | {text}\n")
+    try:
+        with open(_log_path(), "a", encoding="utf-8") as f:
+            f.write(radek)
+    except Exception:
+        pass  # log nesmi shodit ulohu
+
+
+# --- log behu uloh (core.task_log + core.task) ----------------------------
 def log_start(task_klic: str) -> int:
     ted = _now()
     with db_most() as cn:
@@ -163,7 +167,6 @@ def log_konec(log_id: int, task_klic: str, stav: str, zprava: str = None) -> Non
         cur.execute(
             "UPDATE core.task_log SET ts_konec=?, stav=?, zprava=? WHERE id=?",
             ted, stav, zprava, log_id)
-        # prehled v core.task (upsert bez MERGE kvuli jednoduchosti)
         n = cur.execute(
             "UPDATE core.task SET ts_posledni=?, stav=? WHERE klic=?",
             ted, stav, task_klic).rowcount
@@ -172,4 +175,28 @@ def log_konec(log_id: int, task_klic: str, stav: str, zprava: str = None) -> Non
                 """INSERT INTO core.task (klic, aktivni, ts_posledni, stav, ts_sync)
                    VALUES (?, 1, ?, ?, ?)""",
                 task_klic, ted, stav, ted)
+        cn.commit()
+
+
+# --- core.config helpers (pro scheduler: posledni beh) --------------------
+def config_get(klic: str, default=None):
+    with db_most() as cn:
+        cur = cn.cursor()
+        cur.execute("SELECT hodnota FROM core.config WHERE klic=?", klic)
+        r = cur.fetchone()
+        return r[0] if r else default
+
+
+def config_set(klic: str, hodnota: str, typ: str = "str", popis: str = None) -> None:
+    ted = _now()
+    with db_most() as cn:
+        cur = cn.cursor()
+        n = cur.execute(
+            "UPDATE core.config SET hodnota=?, typ=?, ts_sync=? WHERE klic=?",
+            hodnota, typ, ted, klic).rowcount
+        if n == 0:
+            cur.execute(
+                """INSERT INTO core.config (klic, hodnota, typ, popis, ts_sync)
+                   VALUES (?, ?, ?, ?, ?)""",
+                klic, hodnota, typ, popis, ted)
         cn.commit()

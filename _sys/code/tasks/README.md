@@ -33,3 +33,24 @@ pri padu posle mail adminovi (`org.email_org_admin`).
 - Argumenty: `runner.py zasoby_min`
 - Spustit v: `T:\e-most\_sys\code\tasks`
 - Spoustet: denne rano (napr. 6:30).
+
+## Scheduler (planovac v DB)
+Task Scheduler spousti kazdych `[scheduler].beh_minut` (10) jeden prikaz:
+```
+runner.py scheduler
+```
+Scheduler precte `core.task.cron` a spusti ulohy, jejichz cas padl do okna
+od minuleho behu (nic se nepromeska). Plan tedy menis v DB (`core.task.cron`),
+NE v Task Scheduleru.
+
+Priklad zavedeni ulohy do planu:
+```sql
+UPDATE core.task SET cron = '2 6 * * *', aktivni = 1 WHERE klic = 'zasoby_min';
+```
+Cron = 5 poli: min hod den mesic den_v_tydnu  (*, cislo, 6,18, */10, 1-5).
+
+## Textovy log
+Vedle core.task_log se pise i `{base}\_sys\logs\tasks.log`:
+```
+2026-07-10T06:30:05+02:00 | zasoby_min | log_id=123 | info | 8 polozek pod minimem
+```
