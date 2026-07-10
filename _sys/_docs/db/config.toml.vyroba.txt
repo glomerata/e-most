@@ -1,0 +1,31 @@
+# =====================================================================
+# Přidej tento blok do  T:\_system\config\config.toml
+# =====================================================================
+# Pozn.: Windows cesty a NJABKO\SQLEXPRESS musí být v JEDNODUCHÝCH
+# uvozovkách (TOML literal string) – jinak by se \ bral jako escape.
+
+[vyroba]
+ico           = "26896869"
+xml_out_dir   = 'T:\out\pohoda'
+stredisko_ids = "VYROBA"            # sSTR.IDS pro source i destination
+zam_refstr    = 1                   # ZAM.RefStr = středisko výroba
+# Filtr výrobků z dbo.SKz (default = zásoby s výrobním listem):
+produkt_where = "z.ID IN (SELECT DISTINCT RefAg FROM dbo.SKzPol)"
+
+[vyroba.mssql]
+driver   = "ODBC Driver 17 for SQL Server"
+server   = 'NJABKO\SQLEXPRESS'
+database = "StwPh_26896869_2025"
+trusted  = true                     # Windows auth; jinak trusted=false + uid/pwd
+# uid    = ""
+# pwd    = ""
+
+[vyroba.postgres]
+host     = "127.0.0.1"
+port     = 5432
+dbname   = "most"
+user     = "emost"
+password = "ZDE_HESLO"
+
+# Pokud už v config.toml máš připojení k MSSQL nebo PostgreSQL pod jinou
+# sekcí, dej vědět její název – napojím db.py na ni místo této duplikace.

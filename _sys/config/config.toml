@@ -1,0 +1,100 @@
+# =====================================================================
+#  e-most : centrální konfigurace
+#  Verzováno v gitu. HESLA/TOKENY sem NEPATŘÍ → secrets.toml (mimo git).
+#  Kód se nesahá, mění se jen hodnoty zde.
+# =====================================================================
+
+# ── Účetní jednotka ──────────────────────────────────────────────────
+# Kanonická definice firmy. Ostatní sekce se na ni odkazují.
+[org]
+nazev = "Moštárna Hostětín s.r.o."
+ico   = "26896869"
+gln   = "8594045920000"
+
+[org.pohoda]
+# Pohoda SQL databáze: název = "<db_prefix>_<rok>"  (nebo "<db_prefix>_all")
+#   -> StwPh_26896869_2025 , StwPh_26896869_all
+db_prefix = "StwPh_26896869"
+rok       = 2025
+
+# ── Úložiště ─────────────────────────────────────────────────────────
+[storage]
+# Zakladni slozka e-most na zodiacu (z pohledu Win11 .132).
+# UNC je spolehlivejsi nez pismeno disku (funguje i ze sluzby/Task Scheduleru).
+base = "\\\\zodiac\\most\\e-most"
+
+[scan]
+# Dve vstupni slozky podle predvolby na skeneru.
+# 'single' (e-most_jeden_doklad) = cely sken = JEDEN doklad.
+#          Cislo se cte z PRVNI strany, cele PDF se ulozi jako jeden soubor.
+# 'split'  (e-most_rozdelit)      = co strana, to doklad.
+#          PDF se rozreze po strankach, z KAZDE strany se precte jeji cislo
+#          a kazda strana se ulozi do sve vlastni slozky dokladu.
+inbox_single = "{base}\\in\\scan\\single"
+inbox_split  = "{base}\\in\\scan\\split"
+
+[target]
+# Korenova slozka, kam Pohoda uklada prijate objednavky / dodaci listy.
+# Struktura:  <root>\<rada>\<cislo_dokladu>\soubor.pdf
+# napr.       H:\Dokumenty\Mostarna\Fakturace\Prijate objednavky\2621\2621121\
+root = "H:\\Dokumenty\\Mostarna\\Fakturace\\P\u0159ijat\u00e9 objedn\u00e1vky"
+
+# Z cisla dokladu (napr. 2621121) se odvodi:
+#   rada            = prvni 4 znaky  -> 2621
+#   slozka dokladu  = cele cislo     -> 2621121
+series_len = 4
+
+# Smi skript zalozit slozku NOVE RADY, ktera jeste neexistuje?
+#   false (doporuceno na start) = kdyz rada neexistuje, soubor jde do failed.
+#                                 Chrani pred chybou OCR (vymyslene cislo).
+#   true  = skript zalozi i novou radu. Zapni az kdyz OCR overene cte spolehlive.
+allow_new_series = false
+
+[ocr]
+# Cesta k Tesseractu na Win11. Po instalaci UB-Mannheim balicku byva zde:
+tesseract_cmd = "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+lang = "ces"
+dpi  = 300
+
+# Orez pro hledani cisla dodaciho listu (zlomky sirky/vysky stranky).
+# Cislo je vpravo nahore: "DODACI LIST c. 2621121".
+# left/top/right/bottom jako podil rozmeru stranky (0.0 - 1.0).
+crop_left   = 0.45
+crop_top    = 0.0
+crop_right  = 1.0
+crop_bottom = 0.08
+
+# Regex na cislo dokladu. Vychozi: presne 7 cislic.
+doc_number_regex = "\\b(\\d{7})\\b"
+
+[behavior]
+# Pocet sekund, po ktere musi mit soubor stabilni velikost, nez ho vezmeme
+# (aby skript nesebral PDF, ktere skener jeste dopisuje).
+stable_seconds = 5
+# Pripony, ktere zpracovavame.
+extensions = [".pdf"]
+# Po uspesnem ulozeni: smazat zdrojovy soubor z in/scan? (presun, ne kopie)
+delete_source_after = true
+
+[logging]
+level = "INFO"               # DEBUG | INFO | WARNING | ERROR
+file  = "{base}\\_sys\\logs\\scan_pipeline.log"
+
+[paths]
+# Kam putuji soubory, ktere se nepodarilo zpracovat (spolecny kos).
+failed = "{base}\\_sys\\failed"
+
+[vyroba]
+ico           = "26896869"          # = [org].ico  (duplicita – ke konsolidaci až kód čte z [org])
+xml_out_dir   = 't:\e-most\out\xml'
+stredisko_ids = "VYROBA"            # sSTR.IDS pro source i destination
+zam_refstr    = 1                   # ZAM.RefStr = středisko výroba
+# Filtr výrobků z dbo.SKz (default = zásoby s výrobním listem): /// nebo z.EAN is not null
+produkt_where = "z.ID IN (SELECT DISTINCT RefAg FROM dbo.SKzPol)"
+
+[vyroba.mssql]
+driver   = "ODBC Driver 17 for SQL Server"
+server   = 'NJABKO\SQLEXPRESS'
+database = "StwPh_26896869_2025"    # = "{org.pohoda.db_prefix}_{rok}", viz [org.pohoda]
+most_db  = "most"                   # vlastní DB – zápis deníku
+trusted  = true                     # Windows auth; jinak trusted=false + uid/pwd v secrets.toml

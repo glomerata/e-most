@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Výroba{% endblock %} · e-most</title>
+<style>
+  :root{
+    --bg:#f7f4ec; --panel:#ffffff; --ink:#23201a; --muted:#6f6657;
+    --line:#e3dccb; --amber:#c8761b; --amber-d:#a85f10;
+    --green:#3f7d4e; --red:#b23b2e; --field:#fbfaf5;
+    --r:10px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:16px/1.45 "Segoe UI",system-ui,sans-serif}
+  header{background:var(--ink);color:#f7f4ec;padding:14px 20px;
+    display:flex;align-items:baseline;gap:14px;position:sticky;top:0;z-index:5}
+  header b{font-size:19px;letter-spacing:.04em}
+  header .tag{color:var(--amber);font-weight:700}
+  header a{color:#d8cfbd;text-decoration:none;font-size:14px}
+  header a:hover{color:#fff}
+  main{max-width:1100px;margin:0 auto;padding:20px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.08em;
+    color:var(--amber-d);margin:26px 0 10px;border-bottom:2px solid var(--line);
+    padding-bottom:6px}
+  .panel{background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+  input,select,textarea{width:100%;padding:11px 12px;font-size:16px;
+    border:1px solid var(--line);border-radius:8px;background:var(--field);
+    color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--amber);
+    border-color:var(--amber)}
+  .grid{display:grid;gap:12px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase}
+  .btn{display:inline-block;padding:12px 20px;border-radius:8px;border:0;
+    font-size:16px;font-weight:600;cursor:pointer;text-decoration:none}
+  .btn-primary{background:var(--amber);color:#fff}
+  .btn-primary:hover{background:var(--amber-d)}
+  .btn-ghost{background:transparent;color:var(--amber-d);border:1px solid var(--line)}
+  .savebar{position:sticky;bottom:0;background:var(--bg);
+    border-top:2px solid var(--line);padding:14px 0;margin-top:10px;
+    display:flex;justify-content:flex-end;gap:10px}
+  .flash{padding:12px 16px;border-radius:8px;margin-bottom:14px;font-weight:500}
+  .flash.ok{background:#e7f1e9;color:var(--green);border:1px solid #bcd9c3}
+  .flash.error{background:#f6e4e1;color:var(--red);border:1px solid #e3bdb6}
+  .vyrobek-radek{border:1px solid var(--line);border-radius:var(--r);
+    padding:14px;margin-bottom:12px;background:var(--field)}
+  .radek-hlava{display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:10px}
+  .radek-hlava b{color:var(--amber-d)}
+  .odebrat{background:none;border:0;color:var(--red);cursor:pointer;font-size:14px}
+  .hint{font-size:12px;color:var(--muted);margin-top:4px}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<header>
+  <b>VÝROBA <span class="tag">✓</span></b>
+  <a href="{{ url_for('index') }}">Záznamy</a>
+  <a href="{{ url_for('novy') }}">Nový záznam</a>
+  <span style="margin-left:auto;color:#8a8170;font-size:13px">e-most · Moštárna Hostětín</span>
+</header>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

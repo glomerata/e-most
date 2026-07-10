@@ -1,0 +1,597 @@
+---- dump tabulek a views
+SELECT 
+    c.TABLE_NAME,
+    c.ORDINAL_POSITION                                AS poz,
+    c.COLUMN_NAME,
+    c.DATA_TYPE,
+    c.CHARACTER_MAXIMUM_LENGTH                        AS delka,
+    c.NUMERIC_PRECISION                               AS presnost,
+    c.NUMERIC_SCALE                                   AS meritko,
+    c.IS_NULLABLE                                     AS nullable,
+    CASE WHEN pk.COLUMN_NAME IS NOT NULL THEN 'PK' ELSE '' END AS klic
+FROM INFORMATION_SCHEMA.COLUMNS c
+INNER JOIN INFORMATION_SCHEMA.TABLES t
+        ON t.TABLE_NAME = c.TABLE_NAME AND t.TABLE_SCHEMA = c.TABLE_SCHEMA
+LEFT JOIN (
+    SELECT ku.TABLE_NAME, ku.COLUMN_NAME
+    FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
+    JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE ku
+            ON tc.CONSTRAINT_NAME = ku.CONSTRAINT_NAME
+           AND tc.TABLE_NAME      = ku.TABLE_NAME
+    WHERE tc.CONSTRAINT_TYPE = 'PRIMARY KEY'
+) pk ON pk.TABLE_NAME = c.TABLE_NAME AND pk.COLUMN_NAME = c.COLUMN_NAME
+WHERE t.TABLE_TYPE = 'BASE TABLE'
+ORDER BY c.TABLE_NAME, c.ORDINAL_POSITION;
+
+----
+
+SELECT 
+    s.name        AS schema_name,
+    v.name        AS view_name,
+    m.definition  AS create_script
+FROM sys.views v
+JOIN sys.schemas s ON s.schema_id = v.schema_id
+JOIN sys.sql_modules m ON m.object_id = v.object_id
+ORDER BY s.name, v.name;
+-----
+TABLE_NAME	poz	COLUMN_NAME	DATA_TYPE	delka	presnost	meritko	nullable	klic
+c_druh_doklad	1	idag	int	NULL	10	0	NO	PK
+c_druh_doklad	2	agenda	nvarchar	50	NULL	NULL	NO	
+ids	1	IDS	nvarchar	64	NULL	NULL	YES	
+ids	2	IDS_n	nvarchar	64	NULL	NULL	YES	
+ids	3	EAN	nvarchar	20	NULL	NULL	YES	
+ids	4	Nazev	nvarchar	50	NULL	NULL	YES	
+ids	5	Sel	float	NULL	53	NULL	YES	
+ids	6	pKtg	int	NULL	10	0	YES	
+ids	7	Poradi	int	NULL	10	0	YES	
+ids	8	Rep	smallint	NULL	5	0	YES	
+ids	9	Objem	float	NULL	53	NULL	YES	
+ids	10	Podil	float	NULL	53	NULL	YES	
+ids	11	BIO	smallint	NULL	5	0	YES	
+ids	12	NakupC	float	NULL	53	NULL	YES	
+ids	13	id	int	NULL	10	0	NO	PK
+
+-----
+
+-----
+schema_name	view_name	create_script
+dbo	ad	CREATE VIEW dbo.ad
+AS
+SELECT        ID, UsrOrder, Sel, Labels, RefAD, Cislo, RelCR, Firma, Utvar, Jmeno, Ulice, PSC, Obec, RefZeme, Okres, ICO, DIC, ICDPH, RelTypDIC, Firma2, Utvar2, Jmeno2, Ulice2, PSC2, Obec2, RefZeme2, Tel2, Email2, Ucet, KodBanky, Tel, 
+                         Fax, GSM, Email, WWW, Skype, ICQ, GPS, DataBox, CenyIDS, RelForUh, ADSplat, ADSplatZav, ADToler, ADKredit, ADKreditMax, KcObrat, KcObrat2, Skupina, Klic, P1, P2, P3, P4, P5, P6, mPohoda, RelDruh, Ost1, Ost2, Zprava, 
+                         Smlouva, Funkce, RodCisl, Osloveni, DatNar, RelPohl, RelTpIo, IoID, DatCreate, DatSave, RelPkFP, RelTpDPHFP, RelPkFV, RelTpDPHFV, RefUcetFV, RefOsoba, RefStr, RefCin, CisloZAK, RefDopravci, RefCM, RelSzDPH, 
+                         RelSzDPHskz, GdprDatPreAkt, GdprDatPreHist, GdprDatProAkt, GdprDatProHist, GdprDatPostAkt, GdprDatPostHist, GdprOmezeniZprac, Oznacil, Ucetni, Creator, Pozn, Pozn2, NullCheck_Cislo
+FROM            StwPh_26896869_2025.dbo.AD AS AD_1
+dbo	fa	CREATE VIEW dbo.fa
+AS
+SELECT        fa_3.ID, fa_3.UsrOrder, fa_3.RefCin, fa_3.RefStr, fa_3.CisloZAK, fa_3.RefUcet, fa_3.RefZeme, fa_3.RelPk, fa_3.RelTpDPH, fa_3.RelTpFak, fa_3.RelDrFak, fa_3.RelMobch, fa_3.RelForUh, fa_3.RelObDPH, fa_3.RelObKH, 
+                         fa_3.RelObSH, fa_3.RelDruh, fa_3.ZaokrFV, fa_3.ZpOdpZal, fa_3.Sel, fa_3.Labels, fa_3.Polozky, fa_3.DanDokl, fa_3.Vyrizeno, fa_3.TextDokl, fa_3.BPrenes, fa_3.Cislo, fa_3.RelCR, fa_3.PDoklad, fa_3.VarSym, fa_3.ParSym, 
+                         fa_3.CisloKHDPH, fa_3.SText, fa_3.Datum, fa_3.DatUcP, fa_3.DatSplat, fa_3.RelDobr, fa_3.RelStorn, fa_3.TpStorn, fa_3.DatStorn, fa_3.DatLikv, fa_3.DatZdPln, fa_3.DatOdDPH, fa_3.DatKHDPH, fa_3.DatObj, fa_3.HistSzDPH, 
+                         fa_3.DICRegDPHEU, fa_3.MOSS, fa_3.MOSSDukaz, fa_3.RelObMOSS, fa_3.DatZdPlnMOSS, fa_3.MOSSOprava, fa_3.RelZpVypDPH, fa_3.RelTpCalcDPH, fa_3.Kc0, fa_3.Kc1, fa_3.KcDPH1, fa_3.Kc2, fa_3.KcDPH2, fa_3.Kc3, 
+                         fa_3.KcDPH3, fa_3.KcZaloha, fa_3.KcCelkem, fa_3.KcLikv, fa_3.KcKRZaloha, fa_3.KcU, fa_3.KcPrepl, fa_3.KcPreplCelkem, fa_3.KcZaokr, fa_3.KcUpr1, fa_3.KcUpr2, fa_3.KcUpr3, fa_3.KcUprDPH1, fa_3.KcUprDPH2, 
+                         fa_3.KcUprDPH3, fa_3.KcUplat, fa_3.KcZUplat, fa_3.KcP, fa_3.KcPUpr, fa_3.DatPrik, fa_3.RefCM, fa_3.DenEUR, fa_3.CmMnoz, fa_3.CmKurs, fa_3.Cm0, fa_3.CmZaloha, fa_3.CmCelkem, fa_3.CmLikv, fa_3.CmU, fa_3.CmZaokr, 
+                         fa_3.CmP, fa_3.CmPUpr, fa_3.DatSplatPozas, fa_3.KcPozas, fa_3.KcLikvPozas, fa_3.CmPozas, fa_3.CmLikvPozas, fa_3.KcCastZaloha, fa_3.CmCastZaloha, fa_3.OrigKc1, fa_3.OrigKc2, fa_3.KZapoctu, fa_3.CisloObj, fa_3.RefAD, 
+                         fa_3.RefADdod, fa_3.Firma, fa_3.Utvar, fa_3.Jmeno, fa_3.Ulice, fa_3.PSC, fa_3.Obec, fa_3.ICO, fa_3.DIC, fa_3.ICDPH, fa_3.RelTypDIC, fa_3.Email, fa_3.Tel, fa_3.GSM, fa_3.Fax, fa_3.Firma2, fa_3.Utvar2, fa_3.Jmeno2, 
+                         fa_3.Ulice2, fa_3.PSC2, fa_3.Obec2, fa_3.RefZeme2, fa_3.Tel2, fa_3.Email2, fa_3.CenyIDS, fa_3.RefDopravci, fa_3.DatVytEZ, fa_3.Ucet, fa_3.KodBanky, fa_3.PrijZprava, fa_3.SpecSym, fa_3.KonstSym, fa_3.IsDocID, 
+                         fa_3.IsCasRoz, fa_3.DatCreate, fa_3.DatSave, fa_3.TiskFM, fa_3.PlatTerm, fa_3.mPohoda, fa_3.Oznacil, fa_3.Ucetni, fa_3.Creator, fa_3.Lock, fa_3.Lock1, fa_3.Pozn, fa_3.Pozn2, fa_3.RelStavEET, fa_3.StornoEET, 
+                         fa_3.RefEETProfil, fa_3.DatArchiv, fa_3.Archived, fa_3.NullCheck_Cislo, fapol.ID AS Expr1, fapol.Sel AS Expr2, fapol.RefAg, fapol.RefSKz, fapol.RefSKz0, fapol.RefPol, fapol.RelAgID, fapol.RefParentZ, fapol.SText AS Expr3, 
+                         fapol.Pozn AS Expr4, fapol.ParSym AS Expr5, fapol.Kod, fapol.VCislo, fapol.SKzVC, fapol.SeskupVC, fapol.TextMode, fapol.PrenPolRezer, fapol.Mnozstvi, fapol.Prenes, fapol.PrenesBfr, fapol.MJ, fapol.MJKoef, fapol.KcJedn, 
+                         fapol.Sleva, fapol.RelSzDPH, fapol.ProcentoDPH, fapol.SDph, fapol.Kc, fapol.KcDPH, fapol.CmJedn, fapol.Cm, fapol.CmDPH, fapol.JCbezDPH, fapol.RelPk AS Expr6, fapol.RelTpDPH AS Expr7, fapol.PDP, fapol.RelTpPrepl, 
+                         fapol.RefRcPr, fapol.STextRcPr, fapol.KcRcPr, fapol.MJRcPr, fapol.MJKoefRcPr, fapol.MOSSDruh, fapol.RefStr AS Expr8, fapol.RefCin AS Expr9, fapol.CisloZAK AS Expr10, fapol.RelZaruka, fapol.Zaruka, fapol.DatExp, 
+                         fapol.IsDocID AS Expr11, fapol.RelTypPolEET, fapol.DICPover, fapol.DatLikvZal, fapol.DatVystZal, fapol.CmKurs AS Expr12, fapol.CmMnoz AS Expr13, fapol.KcKRozd, fapol.DatCreate AS Expr14, fapol.DatSave AS Expr15, 
+                         fapol.OrderFld
+FROM            (SELECT        ID, UsrOrder, RefCin, RefStr, CisloZAK, RefUcet, RefZeme, RelPk, RelTpDPH, RelTpFak, RelDrFak, RelMobch, RelForUh, RelObDPH, RelObKH, RelObSH, RelDruh, ZaokrFV, ZpOdpZal, Sel, Labels, Polozky, DanDokl, 
+                                                    Vyrizeno, TextDokl, BPrenes, Cislo, RelCR, PDoklad, VarSym, ParSym, CisloKHDPH, SText, Datum, DatUcP, DatSplat, RelDobr, RelStorn, TpStorn, DatStorn, DatLikv, DatZdPln, DatOdDPH, DatKHDPH, DatObj, 
+                                                    HistSzDPH, DICRegDPHEU, MOSS, MOSSDukaz, RelObMOSS, DatZdPlnMOSS, MOSSOprava, RelZpVypDPH, RelTpCalcDPH, Kc0, Kc1, KcDPH1, Kc2, KcDPH2, Kc3, KcDPH3, KcZaloha, KcCelkem, KcLikv, 
+                                                    KcKRZaloha, KcU, KcPrepl, KcPreplCelkem, KcZaokr, KcUpr1, KcUpr2, KcUpr3, KcUprDPH1, KcUprDPH2, KcUprDPH3, KcUplat, KcZUplat, KcP, KcPUpr, DatPrik, RefCM, DenEUR, CmMnoz, CmKurs, Cm0, CmZaloha, 
+                                                    CmCelkem, CmLikv, CmU, CmZaokr, CmP, CmPUpr, DatSplatPozas, KcPozas, KcLikvPozas, CmPozas, CmLikvPozas, KcCastZaloha, CmCastZaloha, OrigKc1, OrigKc2, KZapoctu, CisloObj, RefAD, RefADdod, Firma, 
+                                                    Utvar, Jmeno, Ulice, PSC, Obec, ICO, DIC, ICDPH, RelTypDIC, Email, Tel, GSM, Fax, Firma2, Utvar2, Jmeno2, Ulice2, PSC2, Obec2, RefZeme2, Tel2, Email2, CenyIDS, RefDopravci, DatVytEZ, Ucet, KodBanky, 
+                                                    PrijZprava, SpecSym, KonstSym, IsDocID, IsCasRoz, DatCreate, DatSave, TiskFM, PlatTerm, mPohoda, Oznacil, Ucetni, Creator, Lock, Lock1, Pozn, Pozn2, RelStavEET, StornoEET, RefEETProfil, DatArchiv, Archived, 
+                                                    NullCheck_Cislo
+                          FROM            StwPh_26896869_2024.dbo.FA AS FA_2
+                          UNION ALL
+                          SELECT        ID, UsrOrder, RefCin, RefStr, CisloZAK, RefUcet, RefZeme, RelPk, RelTpDPH, RelTpFak, RelDrFak, RelMobch, RelForUh, RelObDPH, RelObKH, RelObSH, RelDruh, ZaokrFV, ZpOdpZal, Sel, Labels, Polozky, DanDokl, 
+                                                   Vyrizeno, TextDokl, BPrenes, Cislo, RelCR, PDoklad, VarSym, ParSym, CisloKHDPH, SText, Datum, DatUcP, DatSplat, RelDobr, RelStorn, TpStorn, DatStorn, DatLikv, DatZdPln, DatOdDPH, DatKHDPH, DatObj, 
+                                                   HistSzDPH, DICRegDPHEU, MOSS, MOSSDukaz, RelObMOSS, DatZdPlnMOSS, MOSSOprava, RelZpVypDPH, RelTpCalcDPH, Kc0, Kc1, KcDPH1, Kc2, KcDPH2, Kc3, KcDPH3, KcZaloha, KcCelkem, KcLikv, 
+                                                   KcKRZaloha, KcU, KcPrepl, KcPreplCelkem, KcZaokr, KcUpr1, KcUpr2, KcUpr3, KcUprDPH1, KcUprDPH2, KcUprDPH3, KcUplat, KcZUplat, KcP, KcPUpr, DatPrik, RefCM, DenEUR, CmMnoz, CmKurs, Cm0, CmZaloha, 
+                                                   CmCelkem, CmLikv, CmU, CmZaokr, CmP, CmPUpr, DatSplatPozas, KcPozas, KcLikvPozas, CmPozas, CmLikvPozas, KcCastZaloha, CmCastZaloha, OrigKc1, OrigKc2, KZapoctu, CisloObj, RefAD, RefADdod, Firma, 
+                                                   Utvar, Jmeno, Ulice, PSC, Obec, ICO, DIC, ICDPH, RelTypDIC, Email, Tel, GSM, Fax, Firma2, Utvar2, Jmeno2, Ulice2, PSC2, Obec2, RefZeme2, Tel2, Email2, CenyIDS, RefDopravci, DatVytEZ, Ucet, KodBanky, 
+                                                   PrijZprava, SpecSym, KonstSym, IsDocID, IsCasRoz, DatCreate, DatSave, TiskFM, PlatTerm, mPohoda, Oznacil, Ucetni, Creator, Lock, Lock1, Pozn, Pozn2, RelStavEET, StornoEET, RefEETProfil, DatArchiv, Archived, 
+                                                   NullCheck_Cislo
+                          FROM            StwPh_26896869_2023.dbo.FA AS FA_1) AS fa_3 LEFT OUTER JOIN
+                             (SELECT        ID, Sel, RefAg, RefSKz, RefSKz0, RefPol, RelAgID, RefParentZ, SText, Pozn, ParSym, Kod, VCislo, SKzVC, SeskupVC, TextMode, PrenPolRezer, Mnozstvi, Prenes, PrenesBfr, MJ, MJKoef, KcJedn, Sleva, 
+                                                         RelSzDPH, ProcentoDPH, SDph, Kc, KcDPH, CmJedn, Cm, CmDPH, JCbezDPH, RelPk, RelTpDPH, PDP, RelTpPrepl, RefRcPr, STextRcPr, KcRcPr, MJRcPr, MJKoefRcPr, MOSSDruh, RefStr, RefCin, CisloZAK, 
+                                                         RelZaruka, Zaruka, DatExp, IsDocID, RelTypPolEET, DICPover, DatLikvZal, DatVystZal, CmKurs, CmMnoz, KcKRozd, DatCreate, DatSave, OrderFld
+                               FROM            StwPh_26896869_2024.dbo.FApol AS FApol_2
+                               UNION ALL
+                               SELECT        ID, Sel, RefAg, RefSKz, RefSKz0, RefPol, RelAgID, RefParentZ, SText, Pozn, ParSym, Kod, VCislo, SKzVC, SeskupVC, TextMode, PrenPolRezer, Mnozstvi, Prenes, PrenesBfr, MJ, MJKoef, KcJedn, Sleva, 
+                                                        RelSzDPH, ProcentoDPH, SDph, Kc, KcDPH, CmJedn, Cm, CmDPH, JCbezDPH, RelPk, RelTpDPH, PDP, RelTpPrepl, RefRcPr, STextRcPr, KcRcPr, MJRcPr, MJKoefRcPr, MOSSDruh, RefStr, RefCin, CisloZAK, 
+                                                        RelZaruka, Zaruka, DatExp, IsDocID, RelTypPolEET, DICPover, DatLikvZal, DatVystZal, CmKurs, CmMnoz, KcKRozd, DatCreate, DatSave, OrderFld
+                               FROM            StwPh_26896869_2023.dbo.FApol AS FApol_1) AS fapol ON fa_3.ID = fapol.RefAg
+dbo	obj	CREATE VIEW dbo.obj
+AS
+SELECT        *, dbo.grep_hmotnost(Pozn2) AS hmotnost
+FROM            StwPh_26896869_2025.dbo.OBJ
+UNION ALL
+SELECT        *, dbo.grep_hmotnost(Pozn2) AS hmotnost
+FROM            StwPh_26896869_2024.dbo.OBJ
+UNION ALL
+SELECT        *, dbo.grep_hmotnost(Pozn2) AS hmotnost
+FROM            StwPh_26896869_2023.dbo.OBJ;
+dbo	skst	CREATE VIEW dbo.skst
+AS
+SELECT        ID, UsrOrder, Sel, RefSklad, Vetev1, Vetev2, Vetev3, Vetev4, Vetev5, Vetev6, Vetev7, SText, RelNomIo, IoOdd, OnDynTab, Pozn, Oznacil, Ucetni, Creator, DatCreate, DatSave
+FROM            StwPh_26896869_2025.dbo.SkSt
+dbo	skz	CREATE VIEW dbo.skz
+AS
+SELECT        ID, UsrOrder, Sel, Labels, RelSkTyp, RefSklad, RefStruct, RefSkSkup, RelDPHn, RelDPHp, RelSkDruh, Obrat, Odbyt, SvazanaZas, RelSKzVC, AUcet, Vynos, Naklad, RelPkn, RelPkp, RelTpDPHp, RelTpDPHv, CheckTpDPHPDP, 
+                         MOSSDruh, IDS, EAN, Nazev, Nazev1, Nazev2, SText, SText1, SText2, MJ, MJ2, MJ3, MJ2Koef, MJ3Koef, StavZ, StavZV, MinLim, MinMax, Hmotnost, Objem, NazevRP, RefSkEURO, Rezer, ObjedP, ObjedV, Reklam, Servis, 
+                         NakupC, NakupDPH, NakupCM, CMKodNC, VNakup, ProdejKc, ProdejDPH, ProdejCM, CMKodPC, RelTpFix, Marze, Rabat, ObjMn, ObjNazev, RefAD, Firma, PLU, IObchod, mPohoda, Obrazek, RefRcPr, MJKoefRcPr, Popis, Popis2, 
+                         FmtPopis, FmtPopis2, RefStr, RefCin, CisloZAK, Vyrobce, ZpravaV, ZpravaP, RelZaruka, Zaruka, MJCn, MJCnKoef, EditVyr, RelTypPolEET, DICPover, RefPzdJ, Pozn, DatCreate, DatSave, Oznacil, Ucetni, Creator, Novinka, 
+                         Doprodej, Akce, Doporucujeme, Sleva, Priprav, Dodani, Doprava, RefGPSR, TText, Template
+FROM            StwPh_26896869_2025.dbo.SKz AS SKz_1
+dbo	u_fa	CREATE VIEW dbo.u_fa
+AS
+SELECT        *
+FROM            StwPh_26896869_2025.dbo.fa
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2024.dbo.fa
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2023.dbo.fa
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2022.dbo.fa
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2021.dbo.fa
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2020.dbo.fa
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2019.dbo.fa
+dbo	u_pohyby	CREATE VIEW dbo.u_pohyby
+AS
+SELECT        *
+FROM            StwPh_26896869_2025.dbo.qAgSKzPoh
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2024.dbo.qAgSKzPoh
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2023.dbo.qAgSKzPoh
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2022.dbo.qAgSKzPoh
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2021.dbo.qAgSKzPoh
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2020.dbo.qAgSKzPoh
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2019.dbo.qAgSKzPoh;
+dbo	u_pohyby_old	CREATE VIEW u_pohyby AS 
+SELECT * FROM StwPh_26896869_2024.dbo.SKzPoh
+UNION ALL
+SELECT * FROM StwPh_26896869_2023.dbo.SKzPoh 
+UNION ALL
+SELECT * FROM StwPh_26896869_2022.dbo.SKzPoh 
+UNION ALL
+SELECT * FROM StwPh_26896869_2021.dbo.SKzPoh;
+dbo	u_pud	CREATE VIEW dbo.u_pud
+AS
+SELECT        *
+FROM            StwPh_26896869_2025.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2024.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2023.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2022.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2021.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2020.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2019.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2018.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2017.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2016.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2015.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2014.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2013.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2012.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2011.dbo.pUD
+UNION ALL
+SELECT        *
+FROM            StwPh_26896869_2010.dbo.pUD;
+dbo	v_250_vydej_ids_rok	CREATE VIEW dbo.v_250_vydej_ids_rok
+AS
+SELECT        i.Rep, i.Sel, i.Poradi, i.pKtg, i.EAN, i.Nazev, i.IDS_n, MAX(i.Objem) AS ObjemN, MAX(i.Podil) AS Podil_bio, MAX(i.BIO) AS BIO, SUM(CASE WHEN YEAR(p.Datum) = 2011 THEN p.PohPMJ ELSE 0 END) AS [2011], 
+                         SUM(CASE WHEN YEAR(p.Datum) = 2012 THEN p.PohPMJ ELSE 0 END) AS [2012], SUM(CASE WHEN YEAR(p.Datum) = 2017 THEN p.PohPMJ ELSE 0 END) AS [2017], SUM(CASE WHEN YEAR(p.Datum) 
+                         = 2018 THEN p.PohPMJ ELSE 0 END) AS [2018], SUM(CASE WHEN YEAR(p.Datum) = 2019 THEN p.PohPMJ ELSE 0 END) AS [2019], SUM(CASE WHEN YEAR(p.Datum) = 2020 THEN p.PohPMJ ELSE 0 END) AS [2020], 
+                         SUM(CASE WHEN YEAR(p.Datum) = 2021 THEN p.PohPMJ ELSE 0 END) AS [2021], SUM(CASE WHEN YEAR(p.Datum) = 2022 THEN p.PohPMJ ELSE 0 END) AS [2022], SUM(CASE WHEN YEAR(p.Datum) 
+                         = 2023 THEN p.PohPMJ ELSE 0 END) AS [2023], SUM(CASE WHEN YEAR(p.Datum) = 2024 THEN p.PohPMJ ELSE 0 END) AS [2024], SUM(CASE WHEN YEAR(p.Datum) = 2025 THEN p.PohPMJ ELSE 0 END) AS [2025], 
+                         SUM(CASE WHEN DATEDIFF(DAY, p.Datum, GETDATE()) <= 365 THEN p.PohPMJ ELSE 0 END) AS Last365, SUM(CASE WHEN DATEDIFF(DAY, p.Datum, GETDATE()) <= 30 THEN p.PohPMJ ELSE 0 END) AS Last30
+FROM            dbo.v_900_pohyby_vydej AS p LEFT OUTER JOIN
+                         dbo.ids AS i ON p.IDS = i.IDS
+WHERE        (i.Rep = 1) AND (p.PohPMJ > 0)
+GROUP BY i.Rep, i.Sel, i.Poradi, i.pKtg, i.EAN, i.Nazev, i.IDS_n
+dbo	v_252_vydej_most_bio_ids	CREATE VIEW dbo.v_252_vydej_most_bio_ids 
+AS SELECT        TOP (100) PERCENT i.Rep, i.Sel, i.pKtg,  i.Poradi, i.EAN, i.Nazev, i.IDS_n, i.BIO, i.Objem AS objem, i.Podil AS podil,
+             SUM(CASE WHEN YEAR(p.Datum) = 2024 THEN round(p.PohPMJ * i.Objem * i.Podil, 0) ELSE 0 END) 
+                         AS Objem_2024, SUM(CASE WHEN YEAR(p.Datum) = 2011 THEN p.PohPMJ ELSE 0 END) AS [2011], SUM(CASE WHEN YEAR(p.Datum) = 2012 THEN p.PohPMJ ELSE 0 END) AS [2012], SUM(CASE WHEN YEAR(p.Datum) 
+                         = 2017 THEN p.PohPMJ ELSE 0 END) AS [2017], SUM(CASE WHEN YEAR(p.Datum) = 2018 THEN p.PohPMJ ELSE 0 END) AS [2018], SUM(CASE WHEN YEAR(p.Datum) = 2019 THEN p.PohPMJ ELSE 0 END) AS [2019], 
+                         SUM(CASE WHEN YEAR(p.Datum) = 2020 THEN p.PohPMJ ELSE 0 END) AS [2020], SUM(CASE WHEN YEAR(p.Datum) = 2021 THEN p.PohPMJ ELSE 0 END) AS [2021], SUM(CASE WHEN YEAR(p.Datum) 
+                         = 2022 THEN p.PohPMJ ELSE 0 END) AS [2022], SUM(CASE WHEN YEAR(p.Datum) = 2023 THEN p.PohPMJ ELSE 0 END) AS [2023], SUM(CASE WHEN YEAR(p.Datum) = 2024 THEN p.PohPMJ ELSE 0 END) AS [2024], 
+                         SUM(CASE WHEN YEAR(p.Datum) = 2025 THEN p.PohPMJ ELSE 0 END) AS [2025], SUM(CASE WHEN DATEDIFF(DAY, p.Datum, GETDATE()) <= 365 THEN p.PohPMJ ELSE 0 END) AS Last365, SUM(CASE WHEN DATEDIFF(DAY, 
+                         p.Datum, GETDATE()) <= 30 THEN p.PohPMJ ELSE 0 END) AS Last30
+FROM            dbo.v_900_pohyby_vydej AS p LEFT OUTER JOIN
+                         dbo.ids AS i ON p.IDS = i.IDS
+WHERE        (i.Rep = 1) AND (p.PohPMJ > 0)
+GROUP BY i.Rep, i.Sel, i.Poradi, i.pKtg, i.EAN, i.Nazev, i.IDS_n, i.BIO, i.Objem, i.Podil
+dbo	v_253_vydej_pktg_rok	CREATE VIEW dbo.v_253_vydej_pktg_rok
+AS
+SELECT        TOP (100) PERCENT pKtg, ObjemN AS Objem, COUNT(0) AS vyrobky_pocet, SUM([2011]) AS [2011], SUM([2019]) AS [2019], SUM([2020]) AS [2020], SUM([2021]) AS [2021], SUM([2022]) AS [2022], SUM([2023]) AS [2023], 
+                         SUM([2024]) AS [2024], SUM([2025]) AS [2025], SUM(Last365) AS Last365, SUM(Last30) AS Last30
+FROM            dbo.v_250_vydej_ids_rok AS p
+GROUP BY pKtg, ObjemN
+ORDER BY pKtg, Objem
+dbo	v_254_vydej_objem_bio_nebio	CREATE VIEW dbo.v_254_vydej_objem_bio_nebio
+AS
+SELECT        TOP (100) PERCENT YEAR(p.Datum) AS Rok, ROUND(SUM(i.BIO * p.PohPMJ * COALESCE (i.Objem, 0) * COALESCE (i.Podil, 0)), 0) AS objem_BIO, ROUND(SUM(CASE WHEN i.pKtg != 6 THEN i.BIO * p.PohPMJ * COALESCE (i.Objem,
+                          0) * COALESCE (i.Podil, 0) ELSE 0 END), 0) AS objem_BIO_most, ROUND(SUM(CASE WHEN i.pKtg = 6 THEN i.BIO * p.PohPMJ * COALESCE (i.Objem, 0) * COALESCE (i.Podil, 0) ELSE 0 END), 0) AS objem_BIO_ocet, 
+                         ROUND(SUM((1 - p.BIO) * p.PohPMJ * COALESCE (i.Objem, 0) * COALESCE (i.Podil, 0)), 0) AS objem_nebio
+FROM            dbo.v_900_pohyby_vydej AS p LEFT OUTER JOIN
+                         dbo.ids AS i ON p.IDS = i.IDS
+WHERE        (p.PohPMJ > 0)
+GROUP BY YEAR(p.Datum)
+ORDER BY Rok
+dbo	v_259_vydej_ids_rok	CREATE VIEW dbo.v_259_vydej_ids_rok AS
+SELECT
+    p.IDS,
+    (SELECT TOP 1 Nazev FROM dbo.skz WHERE IDS = p.IDS AND Nazev IS NOT NULL) AS Nazev,
+    SUM(CASE WHEN YEAR(p.Datum) = 2021 THEN p.PohPMJ ELSE 0 END) AS [2021],
+    SUM(CASE WHEN YEAR(p.Datum) = 2022 THEN p.PohPMJ ELSE 0 END) AS [2022],
+    SUM(CASE WHEN YEAR(p.Datum) = 2023 THEN p.PohPMJ ELSE 0 END) AS [2023],
+    SUM(CASE WHEN YEAR(p.Datum) = 2024 THEN p.PohPMJ ELSE 0 END) AS [2024],
+    SUM(CASE WHEN YEAR(p.Datum) = 2025 THEN p.PohPMJ ELSE 0 END) AS [2025],
+    SUM(CASE WHEN DATEDIFF(DAY, p.Datum, GETDATE()) <= 365 THEN p.PohPMJ ELSE 0 END) AS Last365,
+    SUM(CASE WHEN DATEDIFF(DAY, p.Datum, GETDATE()) <=  30 THEN p.PohPMJ ELSE 0 END) AS Last30
+FROM dbo.u_pohyby AS p
+WHERE p.RelOP = 2
+  AND p.RelSKZpAg IN (
+        2,   -- Vydané faktury
+        7,   -- Výdejky
+        9,   -- Výroba
+        10   -- Prodejky
+        -- 8 Převod – záměrně vyloučen
+  )
+  AND p.PohPMJ > 0
+GROUP BY p.IDS
+dbo	v_271_obj_sum_cnt_month	CREATE VIEW dbo.v_271_obj_sum_cnt_month
+AS
+SELECT        dbo.date_agg(Datum, 'm') AS dt, SUM(hmotnost) AS hmostnost_sum, SUM(dbo.pocet_zasilek(RefDopravci, hmotnost)) AS pocet_expedic_sum, SUM(CASE WHEN refDopravci = 11 THEN dbo.pocet_zasilek(refDopravci, hmotnost) 
+                         END) AS WEDO, SUM(CASE WHEN refDopravci = 8 THEN dbo.pocet_zasilek(refDopravci, hmotnost) END) AS Zásilkovna, SUM(CASE WHEN refDopravci = 4 THEN dbo.pocet_zasilek(refDopravci, hmotnost) END) AS [GEIS CZ], 
+                         SUM(CASE WHEN refDopravci = 5 THEN dbo.pocet_zasilek(refDopravci, hmotnost) END) AS Nagel, SUM(CASE WHEN refDopravci = 10 THEN dbo.pocet_zasilek(refDopravci, hmotnost) END) AS EXW, 
+                         SUM(CASE WHEN refDopravci = 6 THEN dbo.pocet_zasilek(refDopravci, hmotnost) END) AS Moštárna, SUM(CASE WHEN refDopravci NOT IN (4, 5, 6, 8, 10, 11) THEN dbo.pocet_zasilek(refDopravci, hmotnost) END) 
+                         AS Ostatní
+FROM            dbo.obj
+GROUP BY dbo.date_agg(Datum, 'm')
+dbo	v_281_obj_rozbite_vypis	CREATE VIEW dbo.v_281_obj_rozbite_vypis
+AS
+SELECT        TOP (100) PERCENT ID, Datum, Labels, Firma, Obec, Obec2 AS obec_dodaci, RefDopravci, KcCelkem, Pozn2
+FROM            dbo.obj
+WHERE        (Labels LIKE '%|10|%')
+dbo	v_282_obj_rozbite_cnt_mesic	CREATE VIEW dbo.v_282_obj_rozbite_cnt_mesic
+AS
+SELECT        TOP (100) PERCENT dbo.date_agg(Datum, 'm') AS Mesic, COUNT(ID) AS cnt_celkem, SUM(CASE WHEN RefDopravci = 8 THEN 1 ELSE 0 END) AS cnt_Zasilkovna, SUM(CASE WHEN RefDopravci = 11 THEN 1 ELSE 0 END) 
+                         AS cnt_wedo, SUM(CASE WHEN RefDopravci NOT IN (8, 11) THEN 1 ELSE 0 END) AS cnt_ostatni
+FROM            dbo.obj
+WHERE        (Labels LIKE '%|10|%')
+GROUP BY dbo.date_agg(Datum, 'm')
+dbo	v_301_firma_obrat_rok	CREATE VIEW dbo.v_301_firma_obrat_rok
+AS
+SELECT        CURRENT_TIMESTAMP AS dt, ParICO, CASE WHEN p.ParICO IS NULL THEN 'drobný prodej' ELSE MAX(p.Firma) END AS FirmaN, MAX(DatZdPln) AS Datum_posl, SUM(Kc) AS SumKc, SUM(CASE WHEN YEAR(p.Datum) 
+                         = 2018 THEN p.Kc ELSE 0 END) AS [2018], SUM(CASE WHEN YEAR(p.Datum) = 2019 THEN p.Kc ELSE 0 END) AS [2019], SUM(CASE WHEN YEAR(p.Datum) = 2020 THEN p.Kc ELSE 0 END) AS [2020], 
+                         SUM(CASE WHEN YEAR(p.Datum) = 2021 THEN p.Kc ELSE 0 END) AS [2021], SUM(CASE WHEN YEAR(p.Datum) = 2022 THEN p.Kc ELSE 0 END) AS [2022], SUM(CASE WHEN YEAR(p.Datum) = 2023 THEN p.Kc ELSE 0 END) 
+                         AS [2023], SUM(CASE WHEN YEAR(p.Datum) = 2024 THEN p.Kc ELSE 0 END) AS [2024], SUM(CASE WHEN YEAR(p.Datum) = 2025 THEN p.Kc ELSE 0 END) AS [2025], SUM(CASE WHEN YEAR(p.Datum) 
+                         = 2026 THEN p.Kc ELSE 0 END) AS [2026], SUM(CASE WHEN p.Datum >= DATEFROMPARTS(YEAR(GETDATE()) - 1, 1, 1) AND p.Datum < DATEFROMPARTS(YEAR(GETDATE()), 1, 1) AND DATEPART(DAYOFYEAR, p.Datum) 
+                         <= DATEPART(DAYOFYEAR, GETDATE()) THEN p.Kc ELSE 0 END) AS Obrat_LastYear_SameDay, MAX(DatZdPln) AS Posl_Doklad, DATEDIFF(DAY, MAX(Datum), GETDATE()) AS DnyPosl_Doklad
+FROM            dbo.v_950_pud_prodej AS p
+WHERE        (DatZdPln > '2018-01-01')
+GROUP BY ParICO
+dbo	v_400_sklad_zasoby	CREATE VIEW v_400_sklad_zasoby AS
+SELECT
+  MAX(s.EAN) AS EAN,
+  i.IDS_n AS IDS_n,
+  MIN(i.Nazev) AS nazev,
+  i.pKtg AS pKtg,
+  i.Objem AS Objem,
+  i.Poradi AS Poradi,
+  i.Podil AS Podil,
+  SUM(s.StavZ) AS Stav,
+  SUM(s.StavZ * i.Podil * i.Objem) AS Stava,
+  MAX(s.MinMax) AS MinMax,
+  i.BIO AS BIO,
+  i.Rep AS Rep
+FROM skz AS s
+  LEFT JOIN ids AS i
+    ON s.IDS = i.IDS
+GROUP BY 
+  i.IDS_n,
+  i.pKtg,
+  i.Objem,
+  i.Poradi,
+  i.Podil,
+  i.BIO,
+  i.Rep,
+  i.Rep
+HAVING i.pKtg > 0
+AND i.Rep > 0;
+
+dbo	v_401_sklad_zasoby_dny	CREATE VIEW dbo.v_401_sklad_zasoby_dny
+AS
+SELECT        GETDATE() AS ts, z.EAN, z.IDS_n, z.pKtg, z.Poradi, p.Nazev, z.Objem, z.Podil, z.BIO, z.Stav, p.Last365, CASE WHEN p.Last365 IS NULL OR
+                         p.Last365 = 0 THEN NULL ELSE ROUND(365.0 * z.Stav / p.Last365, 0) END AS Zasoba_Dny_byRok
+FROM            dbo.v_250_vydej_ids_rok AS p INNER JOIN
+                         dbo.v_400_sklad_zasoby AS z ON p.IDS_n = z.IDS_n
+WHERE        (p.Rep = 1)
+GROUP BY z.EAN, z.IDS_n, p.Nazev, z.Objem, z.Podil, z.BIO, z.Stav, p.Last365, z.pKtg, z.Poradi
+dbo	v_410_zasoby_stav	CREATE VIEW dbo.v_410_zasoby_stav
+AS
+SELECT        s.IDS, MAX(s.EAN) AS EAN, MAX(s.Nazev) AS Nazev, MAX(COALESCE (k.Vetev1, k.SText)) AS Skupina, MAX(COALESCE (STUFF(ISNULL('/' + k.Vetev1, '') + ISNULL('/' + k.Vetev2, '') + ISNULL('/' + k.Vetev3, '') 
+                         + ISNULL('/' + k.Vetev4, '') + ISNULL('/' + k.Vetev5, '') + ISNULL('/' + k.Vetev6, '') + ISNULL('/' + k.Vetev7, ''), 1, 1, ''), k.SText)) AS Cleneni, SUM(s.StavZ) AS Stav, COUNT(*) AS pocet_mist, 
+                         SUM(CASE WHEN s.StavZ <> 0 THEN 1 ELSE 0 END) AS pocet_mist_nen
+FROM            dbo.skz AS s LEFT OUTER JOIN
+                         dbo.skst AS k ON s.RefStruct = k.ID
+GROUP BY s.IDS
+dbo	v_411_zasoby_dny	CREATE VIEW dbo.v_411_zasoby_dny AS
+SELECT
+    GETDATE()           AS ts,
+    m.IDS,
+    m.EAN,
+    m.Nazev,
+    m.Stav,
+    m.pocet_mist,
+    m.pocet_mist_nen,
+    p.Last365,
+    p.Last30,
+
+    -- zásoby v dnech podle ročního odběru
+    CASE
+        WHEN p.Last365 IS NULL OR p.Last365 = 0 THEN NULL
+        ELSE ROUND(365.0 * m.Stav / p.Last365, 0)
+    END                 AS Zasoba_Dny,
+
+    -- dynamické limity
+    ROUND(30.0 / 365.0 * p.Last365, 2)   AS Limit_Min_Dyn,   -- 30 dní
+    ROUND(90.0 / 365.0 * p.Last365, 2)   AS Limit_Max_Dyn,   -- 90 dní
+
+    -- semafor
+    CASE
+        WHEN p.Last365 IS NULL OR p.Last365 = 0             THEN 'NEZNÁMO'
+        WHEN m.Stav < ROUND(30.0 / 365.0 * p.Last365, 2)   THEN 'PODLIMIT'
+        WHEN m.Stav > ROUND(90.0 / 365.0 * p.Last365, 2)   THEN 'NADLIMIT'
+        ELSE 'OK'
+    END                 AS Stav_Limitu
+
+FROM dbo.v_410_zasoby_stav AS m
+LEFT JOIN dbo.v_259_vydej_ids_rok AS p ON m.IDS = p.IDS
+dbo	v_412_zasoby_predikce	CREATE VIEW dbo.v_412_zasoby_predikce
+AS
+WITH spotreba AS (SELECT        IDS, SUM(CASE WHEN DATEDIFF(DAY, p.Datum, GETDATE()) <= 365 THEN p.PohPMJ END) AS Last365
+                                          FROM            dbo.u_pohyby AS p
+                                          WHERE        (RelOP = 2) AND (RelSKZpAg IN (2, 7, 9, 10)) AND (PohPMJ > 0)
+                                          GROUP BY IDS)
+    SELECT        z.IDS, z.EAN, z.Nazev, z.Skupina, z.Cleneni, z.Stav, z.pocet_mist, s.Last365, CASE WHEN s.Last365 > 0 THEN ROUND(s.Last365 / 365.0, 3) END AS denni_spotreba, CASE WHEN s.Last365 > 0 AND 
+                              z.Stav > 0 THEN ROUND(z.Stav * 365.0 / s.Last365, 0) END AS dni_do_vycerpani, CASE WHEN s.Last365 > 0 AND z.Stav > 0 THEN DATEADD(DAY, CAST(ROUND(z.Stav * 365.0 / s.Last365, 0) AS int), CAST(GETDATE() AS date))
+                               END AS datum_vycerpani
+     FROM            dbo.v_410_zasoby_stav AS z LEFT OUTER JOIN
+                              spotreba AS s ON z.IDS = s.IDS
+dbo	v_425_vyroba_pocet_dni	CREATE VIEW dbo.v_425_vyroba_pocet_dni
+AS
+SELECT        dbo.date_agg(Datum, 'm') AS mesic, COUNT(*) AS pocet_dnu_vyroby, SUM(CAST(PohPMJ AS int)) AS soucet_za_mesic
+FROM            (SELECT        dbo.date_agg(Datum, 'd') AS Datum, SUM(PohPMJ) AS PohPMJ
+                          FROM            dbo.u_pohyby
+                          WHERE        (RelOP = 1) AND (RelSKZpAg = 9)
+                          GROUP BY dbo.date_agg(Datum, 'd')) AS dny
+GROUP BY dbo.date_agg(Datum, 'm')
+dbo	v_450_etikety	CREATE VIEW dbo.v_450_etikety
+AS
+SELECT        SUBSTRING(s.IDS, 2, 3) AS EAN3, '''' + v.EAN AS EAN, v.pKtg, v.Nazev, v.Last365, v.Stav AS StavVyr, s.StavZ AS StavEt
+FROM            dbo.skz AS s INNER JOIN
+                         dbo.v_401_sklad_zasoby_dny AS v ON SUBSTRING(s.IDS, 2, 3) = SUBSTRING(v.EAN, 10, 3)
+WHERE        (s.Nazev LIKE 'etike%') AND (SUBSTRING(s.IDS, 2, 3) > '000')
+dbo	v_490_zasoby_polozky_kontrola	CREATE VIEW dbo.v_490_zasoby_polozky_kontrola
+AS
+SELECT        TOP (100) PERCENT z.ID, z.EAN, z.Nazev, z.Objem, z.Hmotnost, p.Mnozstvi, p.ID AS Expr1, p.RefAg, p.RefSKz, p.Mnozstvi AS Expr2, p.OrderFld, p.RelTypPol, p.PrijemSZ, p.NevysklSZ, p.UpravaCen, 
+                         z1.Nazev AS nazev_polozky, z1.RefStruct
+FROM            StwPh_26896869_2025.dbo.SKz AS z LEFT OUTER JOIN
+                         StwPh_26896869_2025.dbo.SKzPol AS p ON p.RefAg = z.ID LEFT OUTER JOIN
+                         StwPh_26896869_2025.dbo.SKz AS z1 ON p.RefSKz = z1.ID
+WHERE        (z1.RefStruct IN (61, 8))
+ORDER BY z.ID, p.OrderFld
+dbo	v_690_hosp_vysledek_vyvoj	CREATE VIEW dbo.v_690_hosp_vysledek_vyvoj
+AS
+WITH agg AS (SELECT        YEAR(DatZdPln) AS rok, SUM(CASE WHEN LEFT(SynAu, 1) = '5' THEN KcUD ELSE 0 END) AS naklady, SUM(CASE WHEN LEFT(SynAu, 1) = '6' THEN KcUD ELSE 0 END) AS vynosy, 
+                                                        SUM(CASE WHEN SynAu = '601001' THEN KcUD ELSE 0 END) AS trzby_bio, SUM(CASE WHEN SynAu = '601002' THEN KcUD ELSE 0 END) AS trzby_nebio, SUM(CASE WHEN SynAu BETWEEN '601000' AND 
+                                                        '601099' THEN KcUD ELSE 0 END) AS trzby_celkem
+                               FROM            dbo.v_951_pud_vysledovka_zdroj
+                               GROUP BY YEAR(DatZdPln))
+    SELECT        TOP (100) PERCENT rok, naklady, vynosy, trzby_bio, trzby_nebio, trzby_celkem, CAST(trzby_bio AS decimal(18, 2)) / NULLIF (CAST(trzby_celkem AS decimal(18, 2)), 0) AS trzby_bio_podil
+     FROM            agg AS agg_1
+     WHERE        (rok IS NOT NULL)
+     ORDER BY rok
+dbo	v_720_pohyby_prijem_jablka_den	CREATE VIEW dbo.v_720_pohyby_prijem_jablka_den
+AS
+SELECT        TOP (100) PERCENT CAST(Datum AS DATE) AS den, IDS, SUM(CASE WHEN p.RelOP = 1 THEN p.PohPMJ ELSE 0 END) AS PrijemMnozstvi, COUNT(CASE WHEN p.RelOP = 1 THEN 1 END) AS PrijemPocet, 
+                         SUM(CASE WHEN p.RelOP = 2 THEN p.PohPMJ ELSE 0 END) AS VydejMnozstvi, COUNT(CASE WHEN p.RelOP = 2 THEN 1 END) AS VydejPocet
+FROM            dbo.u_pohyby AS p
+WHERE        (IDS LIKE 'jablka%') AND (RelOP IN (1, 2))
+GROUP BY CAST(Datum AS DATE), IDS
+ORDER BY den
+dbo	v_800_bio_odberatele	CREATE VIEW dbo.v_800_bio_odberatele
+AS
+SELECT        TOP (100) PERCENT CASE WHEN p.ParICO IS NULL THEN 'drobný prodej' ELSE p.ParICO END AS ParICO_or_Text, CASE WHEN p.ParICO IS NULL THEN 'drobný prodej' ELSE p.Firma END AS FirmaN, SUM(Kc) AS SumKc, 
+                         UD
+FROM            dbo.v_950_pud_prodej AS p
+WHERE        (DatZdPln > '2024-05-06') AND (UD = '601001')
+GROUP BY CASE WHEN p.ParICO IS NULL THEN 'drobný prodej' ELSE p.ParICO END, CASE WHEN p.ParICO IS NULL THEN 'drobný prodej' ELSE p.Firma END, UD
+dbo	v_801_bio_dodavatele	CREATE VIEW dbo.v_801_bio_dodavatele
+AS
+SELECT        ParICO AS ICO, DatZdPln, Cislo AS cislo, SText, Firma, Kc
+FROM            dbo.u_pud
+WHERE        (DatZdPln > '20240506') AND (SText LIKE '%BIO%') AND (UMD LIKE '501001')
+dbo	v_831_cenysurovin_vypis	CREATE VIEW dbo.v_831_cenysurovin_vypis
+AS
+SELECT        TOP (100) PERCENT p.IDS, YEAR(p.Datum) AS Rok, p.Datum AS datum, p.PohPMJ AS Mnozstvi, p.PohKc * p.PohPMJ AS Naklady, p.PohKc AS KcJedn, p.Firma AS firma, p.RelOP
+FROM            dbo.u_pohyby AS p LEFT OUTER JOIN
+                         dbo.skz AS s ON p.RefSKz = s.ID
+WHERE        (p.RelOP = 1) AND (s.Popis LIKE '%suro%')
+dbo	v_850_obrat_bio_rok	CREATE VIEW dbo.v_850_obrat_bio_rok
+AS
+SELECT        TOP (100) PERCENT YEAR(DatZdPln) AS rok, SUM(Kc) AS trzby
+FROM            dbo.v_950_pud_prodej AS p
+WHERE        (UD = '601001')
+GROUP BY YEAR(DatZdPln)
+ORDER BY rok
+dbo	v_860_vykup_bio_firma_rok	CREATE VIEW dbo.v_860_vykup_bio_firma_rok
+AS
+SELECT        ICO, COALESCE (Firma, '(bez firmy)') AS Firma, MIN(IDS) AS nazev, SUM(PohPMJ) AS sumMnozstvi, COUNT(ID) AS pocet, MAX(Datum) AS Datum_posledni, SUM(CASE WHEN YEAR(p.Datum) = 2020 THEN p.PohPMJ ELSE 0 END) 
+                         AS sum_2020, SUM(CASE WHEN YEAR(p.Datum) = 2021 THEN p.PohPMJ ELSE 0 END) AS sum_2021, SUM(CASE WHEN YEAR(p.Datum) = 2022 THEN p.PohPMJ ELSE 0 END) AS sum_2022, SUM(CASE WHEN YEAR(p.Datum) 
+                         = 2023 THEN p.PohPMJ ELSE 0 END) AS sum_2023, SUM(CASE WHEN YEAR(p.Datum) = 2024 THEN p.PohPMJ ELSE 0 END) AS sum_2024, SUM(CASE WHEN YEAR(p.Datum) = 2025 THEN p.PohPMJ ELSE 0 END) 
+                         AS sum_2025
+FROM            dbo.u_pohyby AS p
+WHERE        (IDS LIKE 'jablkaBIO') AND (RelOP = 1)
+GROUP BY ICO, Firma
+dbo	v_861_vykup_bio_jablka_polozky	CREATE VIEW dbo.v_861_vykup_bio_jablka_polozky
+AS
+SELECT        TOP (100) PERCENT h.Cislo, h.Datum, h.Firma, h.SText, h.Vyrizeno, p.Kod, p.Mnozstvi, p.KcJedn
+FROM            StwPh_26896869_2025.dbo.SKPP AS h INNER JOIN
+                         StwPh_26896869_2025.dbo.SKPPpol AS p ON p.RefAg = h.ID
+WHERE        (YEAR(h.Datum) = 2025) AND (p.Kod = 'jablkaBIO')
+ORDER BY h.Firma, h.Datum, h.Cislo, p.ID
+dbo	v_862_vykup_bio_jablka_firma_vyrizeno	CREATE VIEW dbo.v_862_vykup_bio_jablka_firma_vyrizeno
+AS
+SELECT        TOP (100) PERCENT h.ICO, h.Firma, SUM(CASE WHEN h.Vyrizeno = 1 THEN p.Mnozstvi ELSE 0 END) AS kg_Vyrizeno, SUM(CASE WHEN h.Vyrizeno = 0 THEN p.Mnozstvi ELSE 0 END) AS kg_Nevyrizeno, 
+                         SUM(CASE WHEN h.Vyrizeno = 0 THEN 1 ELSE 0 END) AS cnt_Nevyrizeno
+FROM            StwPh_26896869_2025.dbo.SKPP AS h INNER JOIN
+                         StwPh_26896869_2025.dbo.SKPPpol AS p ON p.RefAg = h.ID
+WHERE        (YEAR(h.Datum) = 2025) AND (p.Kod = 'jablkaBIO')
+GROUP BY h.ICO, h.Firma
+ORDER BY h.Firma
+dbo	v_869_xxx_vykup_bio_firma_rok	CREATE VIEW dbo.v_860_vykup_bio_firma_rok
+AS
+SELECT        TOP (100) PERCENT CASE WHEN GROUPING(p.Firma) = 1 THEN 'CELKEM' ELSE COALESCE (p.Firma, '(bez firmy)') END AS Firma, MIN(IDS) AS nazev, SUM(PohPMJ) AS sumMnozstvi, COUNT(ID) AS pocet, MAX(Datum) 
+                         AS Datum_posledni, SUM(CASE WHEN YEAR(p.Datum) = 2020 THEN p.PohPMJ ELSE 0 END) AS sum_2020, SUM(CASE WHEN YEAR(p.Datum) = 2021 THEN p.PohPMJ ELSE 0 END) AS sum_2021, 
+                         SUM(CASE WHEN YEAR(p.Datum) = 2022 THEN p.PohPMJ ELSE 0 END) AS sum_2022, SUM(CASE WHEN YEAR(p.Datum) = 2023 THEN p.PohPMJ ELSE 0 END) AS sum_2023, SUM(CASE WHEN YEAR(p.Datum) 
+                         = 2024 THEN p.PohPMJ ELSE 0 END) AS sum_2024, SUM(CASE WHEN YEAR(p.Datum) = 2025 THEN p.PohPMJ ELSE 0 END) AS sum_2025
+FROM            dbo.u_pohyby AS p
+WHERE        (IDS LIKE 'jablkaBIO') AND (RelOP = 1)
+GROUP BY ROLLUP (Firma)
+dbo	v_900_pohyby_vydej	CREATE VIEW dbo.v_900_pohyby_vydej
+AS
+SELECT        p.ID, p.UsrOrder, p.Sel, p.RelSKZpAg, p.RelID, p.RefSKz, p.RefUD, p.OrderFld, p.RefStruct, p.RefSklad, p.IDS, p.EAN, p.Nazev, p.Nazev1, p.Nazev2, p.SText, p.Zaruka, p.RelZaruka, p.RelOP, p.Datum, p.PohPMJ, p.PohKc, 
+                         p.KcCelkemPoh, p.KcOceneni, p.VNakup, p.KcZisk, p.KcCZisk, p.StavZ, p.SkUMD, p.SkUD, p.Cislo, p.RefAD, p.RefADdod, p.Firma, p.Jmeno, p.ICO, p.RefStr, p.RefCin, p.CisloZAK, p.VCislo, p.SKzSKzVC, p.PolSKzVC, p.Oznacil, 
+                         p.PzdAut, i.IDS_n, i.Nazev AS NazevN, i.Sel AS IDS_Sel, i.pKtg, i.Poradi, i.Rep, i.Objem, i.Podil, i.BIO, a.Ost2 AS mKtg, a.KcObrat, a.KcObrat2, a.CenyIDS, a.DatCreate
+FROM            dbo.u_pohyby AS p LEFT OUTER JOIN
+                         dbo.v_ad_sel_ico AS a ON CAST(a.ICO AS VARCHAR(20)) = CAST(p.ICO AS VARCHAR(20)) LEFT OUTER JOIN
+                         dbo.ids AS i ON i.IDS = p.IDS
+WHERE        (p.RelOP = 2) AND (p.RelSKZpAg NOT IN (7, 8, 9)) AND (a.RefAD IS NULL)
+dbo	v_950_pud_all	CREATE VIEW dbo.v_950_pud_all
+AS
+SELECT        ID, UsrOrder, Sel, Labels, TpUD, RelDruhUD, Datum, DatZdPln, Cislo, OrderFld, RelUdAg, RelAgID, RefPozas, RefUD, SText, UMD, UD, Kc, RefCM, DenEUR, CmMnoz, CmKurs, Cm, OrigKc1, RefStr, CisloZAK, RefCin, 
+                         UMDUcelZnak, UDUcelZnak, UMDODPA, UDODPA, UMDPOL, UDPOL, UMDZJ, UDZJ, UMDORJ, UDORJ, UMDORG, UDORG, ParSym, ParSym2, RefAD, Firma, Jmeno, ParICO, Oznacil, Ucetni, Creator, Lock, Lock1, Pozn, 
+                         DatCreate, DatSave
+FROM            dbo.u_pud AS p
+WHERE        (UD BETWEEN '000000' AND '999999')
+dbo	v_950_pud_prodej	CREATE VIEW dbo.v_950_pud_prodej
+AS
+SELECT        ID, UsrOrder, Sel, Labels, TpUD, RelDruhUD, Datum, DatZdPln, Cislo, OrderFld, RelUdAg, RelAgID, RefPozas, RefUD, SText, UMD, UD, Kc, RefCM, DenEUR, CmMnoz, CmKurs, Cm, OrigKc1, RefStr, CisloZAK, RefCin, 
+                         UMDUcelZnak, UDUcelZnak, UMDODPA, UDODPA, UMDPOL, UDPOL, UMDZJ, UDZJ, UMDORJ, UDORJ, UMDORG, UDORG, ParSym, ParSym2, RefAD, Firma, Jmeno, ParICO, Oznacil, Ucetni, Creator, Lock, Lock1, Pozn, 
+                         DatCreate, DatSave
+FROM            dbo.u_pud AS p
+WHERE        (UD BETWEEN '601000' AND '601099') AND (UD NOT LIKE '601010')
+dbo	v_951_pud_vysledovka_zdroj	CREATE VIEW dbo.v_951_pud_vysledkovka_zdroj
+AS
+WITH base AS (SELECT        CASE WHEN LEFT(p.UMD, 1) IN ('5', '6') THEN p.UMD ELSE CASE WHEN LEFT(p.UD, 1) IN ('5', '6') THEN p.UD END END AS SynAu, CASE WHEN LEFT(p.UMD, 1) = '6' OR
+                                                           LEFT(p.UD, 1) = '5' THEN - p.Kc ELSE p.Kc END AS KcUD, ID, UsrOrder, Sel, Labels, TpUD, RelDruhUD, Datum, DatZdPln, Cislo, OrderFld, RelUdAg, RelAgID, RefPozas, RefUD, SText, UMD, UD, Kc, RefCM, 
+                                                           DenEUR, CmMnoz, CmKurs, Cm, OrigKc1, RefStr, CisloZAK, RefCin, UMDUcelZnak, UDUcelZnak, UMDODPA, UDODPA, UMDPOL, UDPOL, UMDZJ, UDZJ, UMDORJ, UDORJ, UMDORG, UDORG, ParSym, ParSym2, 
+                                                           RefAD, Firma, Jmeno, ParICO, Oznacil, Ucetni, Creator, Lock, Lock1, Pozn, DatCreate, DatSave
+                                 FROM            dbo.v_950_pud_all AS p
+                                 WHERE        (LEFT(UMD, 1) IN ('5', '6')) AND (LEFT(UD, 1) <> '7') OR
+                                                           (LEFT(UMD, 1) <> '7') AND (LEFT(UD, 1) IN ('5', '6')))
+    SELECT        SynAu, KcUD, ID, UsrOrder, Sel, Labels, TpUD, RelDruhUD, Datum, DatZdPln, Cislo, OrderFld, RelUdAg, RelAgID, RefPozas, RefUD, SText, UMD, UD, Kc, RefCM, DenEUR, CmMnoz, CmKurs, Cm, OrigKc1, RefStr, CisloZAK, 
+                              RefCin, UMDUcelZnak, UDUcelZnak, UMDODPA, UDODPA, UMDPOL, UDPOL, UMDZJ, UDZJ, UMDORJ, UDORJ, UMDORG, UDORG, ParSym, ParSym2, RefAD, Firma, Jmeno, ParICO, Oznacil, Ucetni, Creator, Lock, Lock1, 
+                              Pozn, DatCreate, DatSave
+     FROM            base AS base_1
+     WHERE        (SynAu IS NOT NULL)
+dbo	v_961_vysledek_vyvoj	CREATE VIEW dbo.v_961_vysledek_vyvoj
+AS
+WITH agg AS (SELECT        YEAR(DatZdPln) AS rok, SUM(CASE WHEN LEFT(SynAu, 1) = '5' THEN KcUD ELSE 0 END) AS naklady, SUM(CASE WHEN LEFT(SynAu, 1) = '6' THEN KcUD ELSE 0 END) AS vynosy, 
+                                                        SUM(CASE WHEN SynAu = '601001' THEN KcUD ELSE 0 END) AS trzby_bio, SUM(CASE WHEN SynAu = '601002' THEN KcUD ELSE 0 END) AS trzby_nebio, SUM(CASE WHEN SynAu BETWEEN '601000' AND 
+                                                        '601099' THEN KcUD ELSE 0 END) AS trzby_celkem
+                               FROM            dbo.v_951_pud_vysledovka_zdroj
+                               GROUP BY YEAR(DatZdPln))
+    SELECT        TOP (100) PERCENT DATETIMEFROMPARTS(rok, 1, 1, 0, 0, 0, 0) AS dt, rok, naklady, vynosy, trzby_bio, trzby_nebio, trzby_celkem, CAST(trzby_bio AS decimal(18, 2)) / NULLIF (CAST(trzby_celkem AS decimal(18, 2)), 0) 
+                              AS trzby_bio_podil
+     FROM            agg AS agg_1
+     WHERE        (rok IS NOT NULL)
+     ORDER BY dt
+dbo	v_970_pud_where_Firma_sText	CREATE VIEW dbo.v_970_pud_where_Firma_sText
+AS
+SELECT        TOP (100) PERCENT ID, UsrOrder, Sel, Labels, TpUD, RelDruhUD, Datum, DatZdPln, Cislo, OrderFld, RelUdAg, RelAgID, RefPozas, RefUD, SText, UMD, UD, Kc, RefCM, DenEUR, CmMnoz, CmKurs, Cm, OrigKc1, RefStr, 
+                         CisloZAK, RefCin, UMDUcelZnak, UDUcelZnak, UMDODPA, UDODPA, UMDPOL, UDPOL, UMDZJ, UDZJ, UMDORJ, UDORJ, UMDORG, UDORG, ParSym, ParSym2, RefAD, Firma, Jmeno, ParICO, Oznacil, Ucetni, Creator, Lock, 
+                         Lock1, Pozn, DatCreate, DatSave
+FROM            dbo.u_pud AS p
+WHERE        (LOWER(Firma) LIKE '%hlav%')
+ORDER BY Datum DESC
+dbo	v_980_mzdy_sum_byZam_Rok	CREATE VIEW dbo.v_980_mzdy_sum_byZam_Rok
+AS
+SELECT        TOP (100) PERCENT p.RefStr AS Stredisko, m.RelDruhM AS [ID pomeru], m.OsCislo AS [ID zam], p.Prijmeni, p.Jmeno, m.Rok, SUM(m.HodOdpra) AS [Celkem hodin], SUM(m.KcZaklM) AS Zakladni_Mzda, SUM(ISNULL(m.KcPres, 
+                         0) + ISNULL(m.KcSvat, 0) + ISNULL(m.KcPremM, 0) + ISNULL(m.KcOsOhoM, 0)) AS Priplatky_a_Premie, SUM(ISNULL(m.KcDov, 0) + ISNULL(m.KcSvatN, 0)) AS Nahrady_Dovolena_Svatek, SUM(m.KcHrubaM) AS Hruba_mzda, 
+                         SUM(m.KcNahrN) AS Nahrada_Nemoc_14dni, SUM(m.KcVyuct) AS [Celkem vyplaceno]
+FROM            StwPh_26896869_2025.dbo.MZ AS m INNER JOIN
+                         StwPh_26896869_2025.dbo.ZAM AS p ON m.RefZAM = p.ID
+GROUP BY p.RefStr, m.RelDruhM, m.OsCislo, p.Prijmeni, p.Jmeno, m.Rok
+ORDER BY Stredisko, m.Rok DESC, p.Prijmeni
+dbo	v_981_mzdy_mesicni_vypis	CREATE VIEW dbo.v_981_mzdy_mesicni_vypis
+AS
+SELECT        TOP (100) PERCENT p.Prijmeni, p.Jmeno, p.RodCisl AS [Rodné číslo], m.OsCislo AS [ID zam], m.RelDruhM AS [ID pomeru], m.KcSzM AS [Hodinová sazba], m.RelMes AS Mesic, m.Rok, m.HodOdpra AS [Pocet hodin], 
+                         m.KcHrubaM AS [Hruba Mzda], m.KcVyuct AS Vyplaceno, p.RefStr
+FROM            StwPh_26896869_2025.dbo.MZ AS m INNER JOIN
+                         StwPh_26896869_2025.dbo.ZAM AS p ON m.RefZAM = p.ID
+ORDER BY p.Prijmeni, m.Rok DESC, CAST(m.RelMes AS INT) DESC
+dbo	v_ad_sel_ico	CREATE VIEW dbo.v_ad_sel_ico
+AS
+SELECT        ICO, RefAD, CASE WHEN ad.ICO IS NULL THEN 'drobný prodej' ELSE ad.Firma END AS Firma, Ost2, KcObrat, KcObrat2, CenyIDS, DatCreate, COUNT(0) AS pocet
+FROM            dbo.ad AS ad
+WHERE        (RefAD IS NULL)
+GROUP BY ICO, RefAD, Firma, Ost2, KcObrat, KcObrat2, CenyIDS, DatCreate

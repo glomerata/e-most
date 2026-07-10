@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Nový záznam{% endblock %}
+{% block content %}
+<form method="post" action="{{ url_for('ulozit') }}">
+
+  <h2>Výroba – denní záznam</h2>
+  <div class="panel grid g4">
+    <div>
+      <label>Datum</label>
+      <input type="date" name="datum" value="{{ dnes }}" required>
+    </div>
+    <div>
+      <label>Vedoucí směny</label>
+      <select name="vedouci_id">
+        <option value="">—</option>
+        {% for z in zamestnanci %}<option value="{{ z.id }}">{{ z.jmeno }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Počátek výroby</label>
+      <input type="time" name="pocatek_vyroby">
+    </div>
+    <div>
+      <label>Konec výroby</label>
+      <input type="time" name="konec_vyroby">
+    </div>
+  </div>
+
+  <h2>Výrobky</h2>
+  <div id="vyrobky"></div>
+  <button type="button" class="btn btn-ghost" onclick="pridatVyrobek()">+ Přidat výrobek</button>
+
+  <h2>Sanitace a údržba</h2>
+  <div class="panel">
+    <table>
+      <thead><tr><th style="width:30%">Oblast</th><th>Popis (SV/TV/pára/louh/schaum…)</th><th style="width:120px">Čas</th></tr></thead>
+      <tbody>
+        {% for klic, label in oblasti %}
+        <tr>
+          <td><b>{{ label }}</b></td>
+          <td><input name="san_{{ klic }}_popis" placeholder="popis"></td>
+          <td><input type="time" name="san_{{ klic }}_cas"></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Zápis</h2>
+  <div class="panel grid g2">
+    <div>
+      <label>Zapsal</label>
+      <select name="zapsal_id">
+        <option value="">—</option>
+        {% for z in zamestnanci %}<option value="{{ z.id }}">{{ z.jmeno }}</option>{% endfor %}
+      </select>
+    </div>
+    <div>
+      <label>Poznámka</label>
+      <input name="poznamka" placeholder="volitelně">
+    </div>
+  </div>
+
+  <div class="savebar">
+    <a href="{{ url_for('index') }}" class="btn btn-ghost">Zrušit</a>
+    <button type="submit" class="btn btn-primary">Uložit a vygenerovat XML</button>
+  </div>
+</form>
+
+<!-- datová sada výrobků pro JS -->
+<script id="vyrobky-data" type="application/json">
+{{ vyrobky | tojson }}
+</script>
+<script>
+const VYROBKY = JSON.parse(document.getElementById('vyrobky-data').textContent);
+const SKLADY = {{ sklady | tojson }};
+let radekIdx = 0;
+
+function optVyrobky(){
+  return VYROBKY.map(v =>
+    `<option value="${v.ids}">${v.nazev}${v.ean ? ' · '+v.ean : ''}</option>`).join('');
+}
+function optSklady(){
+  return SKLADY.map(s => `<option value="${s.ids}">${s.ids} – ${s.nazev}</option>`).join('');
+}
+
+function pridatVyrobek(){
+  radekIdx++;
+  const div = document.createElement('div');
+  div.className = 'vyrobek-radek';
+  div.innerHTML = `
+    <div class="radek-hlava"><b>Výrobek ${radekIdx}</b>
+      <button type="button" class="odebrat" onclick="this.closest('.vyrobek-radek').remove()">odebrat ✕</button></div>
+    <div class="grid g4">
+      <div style="grid-column:span 2">
+        <label>Výrobek</label>
+        <select name="p_ids"><option value="">— vyber —</option>${optVyrobky()}</select>
+      </div>
+      <div>
+        <label>Vyrobené množství</label>
+        <input name="p_mnozstvi" inputmode="decimal" placeholder="0">
+      </div>
+      <div>
+        <label>Sklad</label>
+        <select name="p_sklad"><option value="">—</option>${optSklady()}</select>
+      </div>
+    </div>
+    <div class="grid g4" style="margin-top:10px">
+      <div>
+        <label>DMT (min. trvanlivost)</label>
+        <input type="date" name="p_dmt">
+      </div>
+      <div>
+        <label>Výrobní číslo / šarže</label>
+        <input name="p_vc">
+      </div>
+      <div>
+        <label>Tisk od</label>
+        <input name="p_tisk_od" inputmode="numeric">
+      </div>
+      <div>
+        <label>Tisk do</label>
+        <input name="p_tisk_do" inputmode="numeric">
+      </div>
+    </div>
+    <div class="grid g4" style="margin-top:10px">
+      <div>
+        <label>Refrakce (°Bx)</label>
+        <input name="p_refrakce" inputmode="decimal">
+      </div>
+      <div>
+        <label>Kyselost</label>
+        <input name="p_kyselost" inputmode="decimal">
+      </div>
+      <div style="grid-column:span 2">
+        <label>Zdroj (původ surovin)</label>
+        <input name="p_zdroj">
+      </div>
+    </div>
+    <input type="hidden" name="p_pozn" value="">`;
+  document.getElementById('vyrobky').appendChild(div);
+}
+
+// jeden řádek na start
+pridatVyrobek();
+</script>
+{% endblock %}

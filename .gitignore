@@ -8,6 +8,8 @@ in/
 out/
 tmp/
 files.txt
+_sys/failed/
+_sys/logs/
 
 # ── Python ────────────────────────────────────────────────
 venv/
