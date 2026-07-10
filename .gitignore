@@ -1,0 +1,26 @@
+# ── SECRETS ─ nikdy necommitovat ──────────────────────────
+secrets.toml
+*.secret
+.env
+
+# ── Data / vstupy / výstupy / dočasné ─────────────────────
+in/
+out/
+tmp/
+files.txt
+
+# ── Python ────────────────────────────────────────────────
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# ── Logy / archivy / zálohy ───────────────────────────────
+*.log
+*.zip
+*.bak
+
+# ── OS smetí ──────────────────────────────────────────────
+Thumbs.db
+desktop.ini
+.DS_Store
