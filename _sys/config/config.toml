@@ -39,7 +39,7 @@ from = "e-most@mostarna.bio"                # systémový odesílatel
 
 # ── POHODA mServer (XML tisk sestav do PDF) ─────────────────────────
 [mserver]
-url = "http://njabko:7701/xml"          # dle /http restart "mServer1"
+url = "http://192.168.32.132:7701/xml"          # dle /http restart "mServer1"
 # auth (STW-Authorization Base64) -> secrets.toml [mserver] auth = "..."
 
 # ── Scheduler (plánovač úloh) ────────────────────────────────────────
@@ -74,6 +74,12 @@ subject           = "Upomínka faktur v prodlení"
 pdf_root          = "{doc_root}\\Fakturace\\Vydané faktury"
 series_len        = 4
 
+[tasks.eshop_dostupnost]
+enabled        = true
+mail_to        = ["pavla@mostarna.bio"]
+zasoba_dny_min = 25
+always_send    = false          # true = ranni digest i beze zmeny
+
 [tasks.skeny_kontrola]
 enabled = false
 
@@ -82,6 +88,12 @@ enabled = true
 mail_to = ["pavla@mostarna.bio"]
 subject = "faktury po splatnosti"
 # override prijemce parametrem:  runner.py faktury_po_splatnosti "mailto=nekdo@x.cz"
+
+[tasks.mserver_healthcheck]
+enabled      = true
+pohoda_exe   = "c:\\Program Files (x86)\\STORMWARE\\POHODA SQL\\pohoda.exe"
+mserver_name = "mServer1"
+restart      = true
 
 # =====================================================================
 #  SCAN (modul pipeline.py) — beze změny, jen přesunuto dolů

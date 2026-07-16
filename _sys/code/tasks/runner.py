@@ -21,13 +21,14 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import base  # noqa: E402
 
 _TASKS = {
-    "scheduler":      "tasks.scheduler",
-    "zasoby_min":     "tasks.zasoby_min",
-    "banka_import":   "tasks.banka_import",
-    "upominky":       "tasks.upominky",
-    "mserver_healthcheck": "tasks.mserver_healthcheck",
-    "skeny_kontrola": "tasks.skeny_kontrola",
-    "faktury_po_splatnosti": "tasks.faktury_po_splatnosti",
+    "scheduler":      "scheduler",
+    "zasoby_min":     "zasoby_min",
+    "banka_import":   "banka_import",
+    "upominky":       "upominky",
+    "mserver_healthcheck": "mserver_healthcheck",
+    "skeny_kontrola": "skeny_kontrola",
+    "faktury_po_splatnosti": "faktury_po_splatnosti",
+    "eshop_dostupnost": "eshop_dostupnost",
 }
 
 
