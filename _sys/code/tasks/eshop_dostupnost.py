@@ -8,6 +8,11 @@ Zdroj eshop:  CSV export sablony 10 (windows-1250, oddelovac ';').
   URL s hashem -> secrets.toml [tasks.eshop_dostupnost] shoptet_products_url = "..."
 Realny sklad: dbo.v_401_sklad_zasoby_dny (EAN, Stav, Zasoba_Dny_byRok).
 
+Parovani eshop <-> Pohoda:
+  primarne  eshop 'code'  ->  Pohoda EAN3 (znaky 10-12 EANu),
+  fallback  eshop 'ean'   ->  Pohoda plny EAN.
+  (eshop kody jsou ciste; eshop EANy jsou spinave - duplicity, 12mistne kusy.)
+
 "Nedostupny" = OR:
   - blokovano v eshopu           (productVisibility = 'blocked')
   - eshop hlasi neskladem        (availabilityOutOfStock != 'Skladem', neprazdne)
@@ -15,13 +20,12 @@ Realny sklad: dbo.v_401_sklad_zasoby_dny (EAN, Stav, Zasoba_Dny_byRok).
   - realny sklad <= 0
 'hidden' NENI dostupnost (spousta produktu je skryta zamerne) -> jen informativne.
 
-Chovani:
-  - prvni beh -> jen ulozi baseline, mail NEposila,
-  - dalsi behy -> mail jen kdyz nekdo nove zeskladem/zpet (nove | vyreseno),
-  - always_send = true  -> ranni digest i beze zmeny.
+Pozn.: Zamerne se NEfiltruji neskladove polozky (poukazy, obaly, aukce) ani
+'blocked' - report ma slouzit jako detektor neporadku na eshopu. Az bude eshop
+uklizeny, pripadne se doplni filtr pres 'defaultCategory'.
 
-Pozn.: Shoptet u nas nepocita kusy (stock=0), dostupnost je rizena rucne
-labelem availabilityOutOfStock + viditelnosti; proto se Shoptet 'stock' ignoruje.
+Shoptet u nas nepocita kusy (stock=0), dostupnost je rizena rucne labelem
+availabilityOutOfStock + viditelnosti; proto se Shoptet 'stock' ignoruje.
 """
 
 from __future__ import annotations
@@ -43,19 +47,20 @@ def run(tcfg: dict) -> str:
         raise RuntimeError(
             "chybi shoptet_products_url (secrets.toml [tasks.eshop_dostupnost])")
 
-    prijemci = _prijemci(tcfg)
+    param = _parse_param(tcfg)
+    prijemci = _prijemci(tcfg, param)
     zasoba_min = int(tcfg.get("zasoba_dny_min", 25))
-    always = bool(tcfg.get("always_send", False))
-    predmet_base = tcfg.get("subject", "e-most: dostupnost eshop")
+    always = bool(tcfg.get("always_send", False)) or param.get("force") in ("1", "true", "ano")
+    predmet_base = tcfg.get("subject", "dostupnost eshop")
     log_id = tcfg.get("_log_id")
 
-    # 1) realny sklad z v_401 (_all)
-    sklad = _sklad_map()
+    # 1) realny sklad z v_401 (_all) - dve mapy: podle kodu (EAN3) a podle EANu
+    by_kod, by_ean = _sklad_maps()
 
     # 2) produkty z eshopu + vyhodnoceni
     produkty = _fetch_produkty(url)
     for p in produkty:
-        p["nedostupny"], p["duvod"] = _vyhodnot(p, sklad, zasoba_min)
+        p["nedostupny"], p["duvod"] = _vyhodnot(p, by_kod, by_ean, zasoba_min)
 
     # 3) diff proti ulozenemu stavu + zapis noveho
     prev, first_run = _nacti_prev()
@@ -84,11 +89,20 @@ def run(tcfg: dict) -> str:
 
 
 # --- vstupy ---------------------------------------------------------------
-def _prijemci(tcfg: dict) -> list[str]:
-    # parametr 'mailto=...' prebiji config (stejne jako faktury_po_splatnosti)
-    param = tcfg.get("_param", "")
-    if param.startswith("mailto="):
-        return [param.split("=", 1)[1].strip()]
+def _parse_param(tcfg: dict) -> dict:
+    """'_param' typu 'mailto=x;force=1' -> dict."""
+    out = {}
+    for kv in (tcfg.get("_param") or "").split(";"):
+        kv = kv.strip()
+        if "=" in kv:
+            k, v = kv.split("=", 1)
+            out[k.strip()] = v.strip()
+    return out
+
+
+def _prijemci(tcfg: dict, param: dict) -> list[str]:
+    if param.get("mailto"):
+        return [param["mailto"]]
     return tcfg.get("mail_to", [])
 
 
@@ -98,15 +112,23 @@ def _norm(s) -> str:
     return str(s).lstrip("$").lstrip("'").strip()
 
 
-def _sklad_map() -> dict:
-    """EAN -> (Stav, Zasoba_Dny_byRok) z v_401."""
+def _sklad_maps():
+    """Z v_401 vrati (by_kod, by_ean).
+       by_kod je klicovano EAN3 = znaky 10-12 EANu = eshop 'code'."""
     with base.db_all() as cn:
         cur = cn.cursor()
         cur.execute(
             f"SELECT EAN, CAST(Stav AS int) AS Stav, "
             f"CAST(Zasoba_Dny_byRok AS int) AS ZDny FROM {VIEW_ZASOBY}")
-        return {_norm(r["EAN"]): (r["Stav"], r["ZDny"])
-                for r in base.rows_to_dicts(cur)}
+        by_kod, by_ean = {}, {}
+        for r in base.rows_to_dicts(cur):
+            en = _norm(r["EAN"])
+            val = (r["Stav"], r["ZDny"])
+            if en:
+                by_ean[en] = val
+                if len(en) >= 12:
+                    by_kod[en[9:12]] = val      # EAN3 (SQL substring(EAN,10,3))
+        return by_kod, by_ean
 
 
 def _fetch_produkty(url: str) -> list[dict]:
@@ -136,8 +158,11 @@ def _fetch_produkty(url: str) -> list[dict]:
     return out
 
 
-def _vyhodnot(p: dict, sklad: dict, zasoba_min: int):
-    stav, zdny = sklad.get(_norm(p["ean"]), (None, None))
+def _vyhodnot(p: dict, by_kod: dict, by_ean: dict, zasoba_min: int):
+    # parovani: primarne eshop code -> Pohoda EAN3, fallback plny EAN
+    stav, zdny = (by_kod.get(p["kod"])
+                  or by_ean.get(_norm(p["ean"]))
+                  or (None, None))
     p["stav_realny"], p["zasoba_dny"] = stav, zdny
     dost = (p["dostupnost"] or "").strip().lower()
     # 1) rucne nastaveno jako nedostupne v eshopu

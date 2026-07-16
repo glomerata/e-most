@@ -37,6 +37,9 @@ port = 25
 auth = false                                # relay bez přihlášení; heslo netřeba
 from = "e-most@mostarna.bio"                # systémový odesílatel
 
+[mail]
+subject_prefix = "🍏 [e-most]"
+
 # ── POHODA mServer (XML tisk sestav do PDF) ─────────────────────────
 [mserver]
 url = "http://192.168.32.132:7701/xml"          # dle /http restart "mServer1"

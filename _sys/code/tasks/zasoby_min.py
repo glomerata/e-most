@@ -18,7 +18,7 @@ import base
 def run(tcfg: dict) -> str:
     view = tcfg.get("view", "dbo.v_451_skz_obj_min_stav")
     prijemci = tcfg.get("mail_to", [])
-    predmet = tcfg.get("subject", "e-most: zasoby pod minimem")
+    predmet = tcfg.get("subject", "zasoby pod minimem")
     posilat_prazdne = tcfg.get("posilat_prazdne", False)
 
     with base.db_all() as cn:

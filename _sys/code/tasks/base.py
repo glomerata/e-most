@@ -129,6 +129,9 @@ def posli_mail(predmet: str, telo: str, prijemci, html: bool = False,
     else:
         msg = telo_part
 
+    prefix = cfg().get("mail", {}).get("subject_prefix", "")
+    if prefix and not predmet.startswith(prefix):
+        predmet = f"{prefix} {predmet}"
     msg["Subject"] = predmet
     msg["From"] = s["from"]
     msg["To"] = ", ".join(prijemci)
